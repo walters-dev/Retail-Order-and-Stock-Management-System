@@ -1,8 +1,8 @@
-﻿namespace RetailOrderStockManagementSystem.Models
+﻿namespace RetailOrderStockManagementSystem.Domain.Models
 {
-    public class Manager
+    public class Admin
     {
-        public int ManagerId { get; set; }
+        public int AdminId { get; set; }
         public string Email { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }

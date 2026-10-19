@@ -2,7 +2,7 @@
 
 namespace RetailOrderStockManagementSystem.DTOs
 {
-    public class CreateManagerResponseDto
+    public class CreateManagerRequestDto
     {
         [Required(ErrorMessage = "Email is required.")]
         [EmailAddress(ErrorMessage = "Must be a valid email")]

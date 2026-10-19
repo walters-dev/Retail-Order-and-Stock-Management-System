@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 namespace RetailOrderStockManagementSystem.DTOs
 {
-    public class CreateAdminResponseDto
+    public class CreateAdminRequestDto
     {
         [Required(ErrorMessage = "Email is required.")]
         [EmailAddress(ErrorMessage = "Must be a valid email")]
