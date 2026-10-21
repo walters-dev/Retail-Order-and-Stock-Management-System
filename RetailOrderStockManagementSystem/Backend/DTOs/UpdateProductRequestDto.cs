@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace RetailOrderStockManagementSystem.DTOs
+namespace RetailOrderStockManagementSystem.Backend.DTOs
 {
-    public class CreateProductRequestDto
+    public class UpdateProductRequestDto
     {
         [Required(ErrorMessage = "SKU is required.")]
         [StringLength(8, ErrorMessage = "SKU must be 8 characters long.", MinimumLength = 8)]
@@ -19,7 +19,7 @@ namespace RetailOrderStockManagementSystem.DTOs
         [Range(0.01, 9999.99, ErrorMessage = "Unit Price must be within the range of 0,01-9999,99.")]
         public decimal UnitPrice { get; set; }
         [Required(ErrorMessage = "StockQuantity is required.")]
-        [RegularExpression("^[0-9]+$", ErrorMessage ="Stock Quantity must be a whole number.")]
+        [RegularExpression("^[0-9]+$", ErrorMessage = "Stock Quantity must be a whole number.")]
         [Range(0, 9999, ErrorMessage = "Stock quantity must be within the range of 0-9999.")]
         public int StockQuantity { get; set; }
     }

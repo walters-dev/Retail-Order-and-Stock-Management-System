@@ -11,7 +11,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
+    <Folder Include="Backend\Controllers\" />
+    <Folder Include="Backend\Data\" />
+    <Folder Include="Backend\Middleware\" />
+    <Folder Include="Backend\Mapper\" />
+    <Folder Include="Backend\Services\" />
+    <Folder Include="Frontend\" />
   </ItemGroup>
 
 </Project>

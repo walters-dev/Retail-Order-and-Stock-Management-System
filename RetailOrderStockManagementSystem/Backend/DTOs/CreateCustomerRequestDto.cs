@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace RetailOrderStockManagementSystem.DTOs
+namespace RetailOrderStockManagementSystem.Backend.DTOs
 {
     public class CreateCustomerRequestDto
     {

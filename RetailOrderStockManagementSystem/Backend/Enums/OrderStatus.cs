@@ -1,4 +1,4 @@
-﻿namespace RetailOrderStockManagementSystem.Domain.Enums
+﻿namespace RetailOrderStockManagementSystem.Backend.Enums
 {
     public class OrderStatus
     {
