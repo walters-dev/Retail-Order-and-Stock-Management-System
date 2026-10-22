@@ -11,9 +11,8 @@ namespace RetailOrderStockManagementSystem.Backend.DTOs
         [Required(ErrorMessage = "Mobile Number is required.")]
         [Phone(ErrorMessage = "Phone number must be valid")]
         public string MobileNumber { get; set; } = "";
-        [Required(ErrorMessage = "Email is required.")]
         [EmailAddress(ErrorMessage = "Must be a valid email")]
         [StringLength(255, ErrorMessage = "Email cannot exceed 255 characters.")]
-        public string Email { get; set; } = "";
+        public string? Email { get; set; }
     }
 }
