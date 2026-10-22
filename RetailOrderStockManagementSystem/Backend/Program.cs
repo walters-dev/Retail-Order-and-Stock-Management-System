@@ -14,6 +14,9 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+//CORS 
+
+
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
