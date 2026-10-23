@@ -1,4 +1,4 @@
-﻿namespace RetailOrderStockManagementSystem.Models
+﻿namespace RetailOrderStockManagementSystem.Backend.Models
 {
     public class DiscountRule
     {
