@@ -242,6 +242,17 @@ namespace RetailOrderStockManagementSystem.Backend.Data
 
                 entity.HasIndex(x => x.DiscountRuleId)
                     .HasDatabaseName("ix_orders_discount_rule_id");
+                modelBuilder.Entity<Order>(order =>
+                {
+                    order.Property(x => x.ReceiptId)
+                        .HasColumnName("receipt_id")
+                        .UseIdentityByDefaultColumn()
+                        .IsRequired();
+
+                    order.HasIndex(x => x.ReceiptId)
+                        .IsUnique()
+                        .HasDatabaseName("orders_receipt_id_key");
+                });
             });
 
             // ORDER LINE ITEMS

@@ -163,6 +163,13 @@ namespace RetailOrderStockManagementSystem.Backend.Migrations
                         .HasColumnName("order_date")
                         .HasDefaultValueSql("CURRENT_DATE");
 
+                    b.Property<int>("ReceiptId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("receipt_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ReceiptId"));
+
                     b.Property<OrderStatus.Status>("Status")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("public.order_status")
@@ -188,6 +195,10 @@ namespace RetailOrderStockManagementSystem.Backend.Migrations
 
                     b.HasIndex("DiscountRuleId")
                         .HasDatabaseName("ix_orders_discount_rule_id");
+
+                    b.HasIndex("ReceiptId")
+                        .IsUnique()
+                        .HasDatabaseName("orders_receipt_id_key");
 
                     b.ToTable("orders", "public", t =>
                         {
