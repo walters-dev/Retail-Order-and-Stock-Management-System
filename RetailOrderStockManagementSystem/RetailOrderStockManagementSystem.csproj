@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="13.6.3" />
+    <PackageReference Include="AutoMapper" Version="14.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.13" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.13" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.13" />
@@ -26,8 +27,6 @@
   <ItemGroup>
     <Folder Include="Backend\Controllers\" />
     <Folder Include="Backend\Data\" />
-    <Folder Include="Backend\Middleware\" />
-    <Folder Include="Backend\Mapper\" />
     <Folder Include="Backend\Services\" />
     <Folder Include="Frontend\" />
   </ItemGroup>
