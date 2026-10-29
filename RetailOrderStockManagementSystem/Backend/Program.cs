@@ -1,10 +1,12 @@
+using RetailOrderStockManagementSystem.Backend.Mapper;
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Add services to the contain(er.
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
 
 var app = builder.Build();
 
