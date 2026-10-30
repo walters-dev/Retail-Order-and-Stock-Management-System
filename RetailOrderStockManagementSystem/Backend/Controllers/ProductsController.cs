@@ -19,7 +19,7 @@ public class ProductsController : ControllerBase
     public async Task<IActionResult> Create(CreateProductRequestDto dto)
     {
         var product = await _productService.CreateAsync(dto);
-        return CreatedAtAction(nameof(GetById), new { id = product.ProductId}, product);
+        return CreatedAtAction(nameof(GetById), new { id = product.ProductId }, product);
     }
 
     [HttpGet]
@@ -47,10 +47,10 @@ public class ProductsController : ControllerBase
         return updatedProduct ? NoContent() : NotFound();
     }
 
-    [HttpDelete]
-    public async Task<IActionResult> Delete(int id)
-    {
-        var deletedProduct = await _productService.DeleteAsync(id);
-        return deletedProduct ? NoContent() : NotFound();
-    }
+    //[HttpDelete]
+    //public async Task<IActionResult> Delete(int id)
+    //{
+    //    var deletedProduct = await _productService.DeleteAsync(id);
+    //    return deletedProduct ? NoContent() : NotFound();
+    //}
 }

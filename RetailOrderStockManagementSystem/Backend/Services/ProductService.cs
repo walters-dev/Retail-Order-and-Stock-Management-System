@@ -57,16 +57,16 @@ public class ProductService : IProductService
         return true;
     }
 
-    public async Task<bool> DeleteAsync(int id)
-    {
-        var product = await _repository.GetByIdAsync(id);
+    //public async Task<bool> DeleteAsync(int id)
+    //{
+    //    var product = await _repository.GetByIdAsync(id);
 
-        if (product == null)
-            return false;
+    //    if (product == null)
+    //        return false;
 
-        await _repository.DeleteAsync(product);
-        return true;
-    }
+    //    await _repository.DeleteAsync(product);
+    //    return true;
+    //}
 
     private static ProductResponseAdminDto MapToDto(Product p) => new()
     {

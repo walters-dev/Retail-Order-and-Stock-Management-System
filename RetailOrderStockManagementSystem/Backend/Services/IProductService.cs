@@ -8,5 +8,5 @@ public interface IProductService
     Task<ProductResponseAdminDto?> GetByIdAsync(int id);
     Task<ProductResponseAdminDto> CreateAsync(CreateProductRequestDto dto);
     Task<bool> UpdateAsync(int id, UpdateProductRequestDto dto);
-    Task<bool> DeleteAsync(int id);
+    //Task<bool> DeleteAsync(int id);
 }
