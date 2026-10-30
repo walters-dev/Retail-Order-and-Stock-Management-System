@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using RetailOrderStockManagementSystem.Backend.Data;
 using RetailOrderStockManagementSystem.Backend.Enums;
+using RetailOrderStockManagementSystem.Backend.Repositories;
+using RetailOrderStockManagementSystem.Backend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +25,8 @@ builder.Services.AddDbContext<RetailDbContext>(options =>
         postgres.MapEnum<OrderStatus.Status>("order_status", "public");
         postgres.MapEnum<Users.UserTypes>("user_type", "public");
     }));
+builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+builder.Services.AddScoped<ICustomerService, CustomerService>();
 
 
 var app = builder.Build();
