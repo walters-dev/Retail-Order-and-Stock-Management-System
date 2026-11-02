@@ -3,14 +3,16 @@ using RetailOrderStockManagementSystem.Backend.Data;
 using RetailOrderStockManagementSystem.Backend.Enums;
 using RetailOrderStockManagementSystem.Backend.Repositories;
 using RetailOrderStockManagementSystem.Backend.Services;
+using RetailOrderStockManagementSystem.Backend.Mapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Add services to the contain(er.
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
 
 // Read the connection string saved in User Secrets.
 var connectionString =
@@ -28,6 +30,8 @@ builder.Services.AddDbContext<RetailDbContext>(options =>
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 
+builder.Services.AddScoped<IProductRepository,  ProductRepository>();
+builder.Services.AddScoped<IProductService, ProductService>();
 
 var app = builder.Build();
 
