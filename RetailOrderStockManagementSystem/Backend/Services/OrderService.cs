@@ -41,7 +41,6 @@ public class OrderService
         {
             OrderDate = o.OrderDate,
             Subtotal = o.Subtotal,
-            DiscountPercent = o.DiscountPercent,
             FinalTotal = o.FinalTotal,
             Status = o.Status
         };

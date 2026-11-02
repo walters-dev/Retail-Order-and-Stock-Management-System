@@ -1,4 +1,5 @@
-﻿using RetailOrderStockManagementSystem.Backend.DTOs;
+﻿using Microsoft.IdentityModel.Tokens;
+using RetailOrderStockManagementSystem.Backend.DTOs;
 using RetailOrderStockManagementSystem.Backend.Models;
 using RetailOrderStockManagementSystem.Backend.Repositories;
 
@@ -27,6 +28,15 @@ public class ProductService : IProductService
 
     public async Task<ProductResponseAdminDto> CreateAsync(CreateProductRequestDto dto)
     {
+        if (string.IsNullOrEmpty(dto.SKU))
+            throw new ArgumentException("SKU is required.");
+        if (string.IsNullOrWhiteSpace(dto.Name))
+            throw new ArgumentException("Name is required.");
+        if (dto.UnitPrice <= 0)
+            throw new ArgumentException("Unit price must be greater than zero.");
+        if (dto.StockQuantity < 0)
+            throw new ArgumentException("Stock quantity may not be negative.");
+
         var product = new Product
         {
             SKU = dto.SKU,
