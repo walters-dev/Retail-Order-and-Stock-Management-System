@@ -27,6 +27,16 @@ public class OrderService
 
     public async Task<OrderResponseAdminDto> CreateAsync(Order o)
     {
+        /* Add validation below (from bussiness rules)
+         * Customer active? Every order must belong to a valid customer.
+         * Product active? Only active products may be added to a new quote or order.
+         * Order qty > 0? Order quantities must be positive whole numbers.
+         * Qty < stockQty? Requested quantity may not exceed available StockQuantity.
+         * 
+        */
+
+
+
         var newOrder = new Order
         {
             OrderDate = o.OrderDate,

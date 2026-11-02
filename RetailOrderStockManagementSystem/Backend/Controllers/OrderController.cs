@@ -16,12 +16,12 @@ public class OrderController : ControllerBase
         _orderService = orderService;
     }
 
-    [HttpPost]
-    public async Task<IActionResult> Create(Order o)
-    {
-        var order = await _orderService.CreateAsync(o);
-        return CreatedAtAction(nameof(GetById), new { id = order.OrderId }, order);
-    }
+    //[HttpPost]
+    //public async Task<IActionResult> Create(Order o)
+    //{
+    //    var order = await _orderService.CreateAsync(o);
+    //    return CreatedAtAction(nameof(GetById), new { id = order.OrderId }, order);
+    //}
 
     [HttpGet]
     public async Task<IActionResult> GetAll()

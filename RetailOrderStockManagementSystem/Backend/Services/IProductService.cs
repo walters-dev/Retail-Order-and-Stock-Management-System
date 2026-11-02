@@ -4,7 +4,7 @@ namespace RetailOrderStockManagementSystem.Backend.Services;
 
 public interface IProductService
 {
-    Task<List<ProductResponseAdminDto>> GetAllAsync();
+    Task<List<ProductResponseAdminDto>> GetAllAsync(ProductQueryParameters parameters);
     Task<ProductResponseAdminDto?> GetByIdAsync(int id);
     Task<ProductResponseAdminDto> CreateAsync(CreateProductRequestDto dto);
     Task<bool> UpdateAsync(int id, UpdateProductRequestDto dto);
