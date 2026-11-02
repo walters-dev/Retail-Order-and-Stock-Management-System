@@ -26,6 +26,8 @@
 
   <ItemGroup>
     <Folder Include="Backend\Data\" />
+    <Folder Include="Backend\Middleware\" />
+    <Folder Include="Backend\Mapper\" />
     <Folder Include="Frontend\" />
   </ItemGroup>
 
