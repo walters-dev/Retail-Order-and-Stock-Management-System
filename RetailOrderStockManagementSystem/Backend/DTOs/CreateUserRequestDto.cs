@@ -13,5 +13,9 @@ namespace RetailOrderStockManagementSystem.Backend.DTOs
         [Required(ErrorMessage = "Password is required.")]
         [StringLength(30, ErrorMessage = "Password cannot exceed 30 characters.")]
         public string Password { get; set; } = "";
+        [Required]
+        [RegularExpression("^(Staff|Admin|Manager)$", ErrorMessage = "Role must be Admin or Staff or Manager.")]
+        public string Type {  get; set; }
     }
 }
+            
