@@ -28,34 +28,40 @@ public class ProductService : IProductService
 
     public async Task<ProductResponseAdminDto> CreateAsync(CreateProductRequestDto dto)
     {
-        if (string.IsNullOrEmpty(dto.SKU))
-            throw new ArgumentException("SKU is required.");
-        if (string.IsNullOrWhiteSpace(dto.Name))
-            throw new ArgumentException("Name is required.");
-        if (dto.UnitPrice <= 0)
-            throw new ArgumentException("Unit price must be greater than zero.");
-        if (dto.StockQuantity < 0)
-            throw new ArgumentException("Stock quantity may not be negative.");
+        string sku = dto.SKU.Trim();
 
-        var product = new Product
+        if (string.IsNullOrEmpty(sku))
+            throw new ArgumentException("SKU is required.");
+
+        if (await _repository.SkuExistsAsync(sku))
+            throw new ArgumentException($"A product with this sku ({sku}) already exists.");
+
+            var product = new Product
         {
             SKU = dto.SKU,
             Name = dto.Name,
             Category = dto.Category,
             UnitPrice = dto.UnitPrice,
+            IsActive = true,
             StockQuantity = dto.StockQuantity
+            //,CreatedAt = dto.CreatedAt,
+            //UpdatedAt = dto.UpdatedAt
         };
 
         product = await _repository.AddAsync(product);
         return MapToDto(product);
     }
 
-    public async Task<bool> UpdateAsync(int id, UpdateProductRequestDto dto)
+    public async Task<bool> UpdateAsync(UpdateProductRequestDto dto, int id)
     {
         var product = await _repository.GetByIdAsync(id);
+        string sku = dto.SKU.Trim();
 
         if (product == null)
             return false;
+
+        if (await _repository.SkuExistsAsync(sku))
+            throw new ArgumentException($"A product with this sku ({sku}) already exists.");
 
         product.SKU = dto.SKU;
         product.Name = dto.Name;
@@ -63,7 +69,7 @@ public class ProductService : IProductService
         product.UnitPrice = dto.UnitPrice;
         product.StockQuantity = dto.StockQuantity;
 
-        await _repository.UpdateAsync(product);
+        await _repository.UpdateAsync(id);
         return true;
     }
 
@@ -80,6 +86,7 @@ public class ProductService : IProductService
 
     private static ProductResponseAdminDto MapToDto(Product p) => new()
     {
+        ProductId = p.ProductId,
         SKU = p.SKU,
         Name = p.Name,
         Category = p.Category,

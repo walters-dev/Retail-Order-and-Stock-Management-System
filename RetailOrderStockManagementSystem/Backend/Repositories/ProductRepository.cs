@@ -54,10 +54,24 @@ public class ProductRepository : IProductRepository
         return product;
     }
 
-    public async Task UpdateAsync(Product product)
+    public async Task<bool> UpdateAsync(int id)
     {
-        _retailDbContext.Products.Update(product);
+        // Retrieve existing product from the database
+        var product = await _retailDbContext.Products.FindAsync(id);
+
+        // Return null if Product doesn't exist
+        if (product == null)
+        {
+            return false;
+        }
+
+        // Update status instead of removing the record
+        //_retailDbContext.Products.Update(product);
+        product.UpdatedAt = DateOnly.FromDateTime(DateTime.UtcNow);
+
+        // Persist/save changes to the database
         await _retailDbContext.SaveChangesAsync();
+        return true;
     }
 
     public async Task<bool> DeleteAsync(int id)
@@ -79,4 +93,18 @@ public class ProductRepository : IProductRepository
         await _retailDbContext.SaveChangesAsync();
         return true;
     }
+
+    public async Task<bool> SkuExistsAsync(string sku, int? excludedProductId = null)
+    {
+        var query = _retailDbContext.Products.Where(product => product.SKU == sku);
+
+        if (excludedProductId.HasValue)
+        {
+            int productId = excludedProductId.Value;
+            query = query.Where(product => product.SKU != sku);
+        }
+
+        return await query.AnyAsync();
+    }
+
 }
