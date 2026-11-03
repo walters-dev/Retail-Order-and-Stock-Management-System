@@ -3,5 +3,6 @@
 public class DiscountResult
 {
     public string DiscountName { get; set; } = string.Empty;
+    public decimal DiscountPercentage { get; set; }
     public decimal DiscountAmount { get; set; }
 }

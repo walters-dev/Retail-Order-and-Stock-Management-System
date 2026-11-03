@@ -13,11 +13,8 @@ public class PricingService
         _discountService = discountService;
     }
 
-    public decimal CalculateLineTotal(OrderLineItem orderLineItem, Product product)
+    public decimal CalculateLineTotal(int quantity, decimal unitPrice)
     {
-        decimal quantity = orderLineItem.Quantity;
-        decimal unitPrice = product.UnitPrice;
-
         return quantity * unitPrice;
     }
 
@@ -27,17 +24,22 @@ public class PricingService
     }
 
 
-    public decimal GetDiscountPercentage(List<OrderLineItem> items)
+    public decimal GetDiscountPercentage(Customer customer, Order order, 
+        decimal subtotal)
     {
-        decimal subtotal = CalculateSubtotal(items);
-        DiscountResult discount = _discountService.CalculateDiscount(subtotal);
+        return _discountService.
+            CalculateDiscount(customer, order , subtotal).DiscountPercentage;
     }
 
+    public decimal GetDiscountAmount(Customer customer, Order order,
+        decimal subtotal)
+    {
+        return _discountService.
+            CalculateDiscount(customer, order, subtotal).DiscountAmount;
+    }
 
-
-
-
-
-
-
+    public decimal CalculateFinalTotal(decimal subtotal, decimal discountAmount)
+    {
+        return subtotal - discountAmount;
+    }
 }

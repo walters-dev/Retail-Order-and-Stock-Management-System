@@ -16,6 +16,6 @@ namespace RetailOrderStockManagementSystem.Backend.Models
         public DateOnly? UpdatedAt { get; set; }
         public int? DiscountRuleId { get; set; }
         public int ReceiptId { get; set; }
-        public bool LargeOrder { get; set; }
+        //public bool LargeOrder { get; set; }
     }
 }

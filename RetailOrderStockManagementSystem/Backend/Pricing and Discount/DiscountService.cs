@@ -13,50 +13,34 @@ public class DiscountService
         decimal subtotal)
     {
         decimal highestPercentage = 0m;
+        string discountName = "No discount";
 
-        if (order.LargeOrder && 
+        if (subtotal > 2000 && 
             LargeOrderDiscountPercentage > highestPercentage)
         {
-            return new DiscountResult
-            {
-                DiscountName = "Large Order Discount",
-                DiscountAmount = subtotal * LargeOrderDiscountPercentage
-            };
+            highestPercentage = LargeOrderDiscountPercentage;
+            discountName = "Large Order Discount";
         }
 
         if (customer.FirstTimeCustomer && 
             FirstTimeCustomerDiscountPercentage > highestPercentage)
         {
-            return new DiscountResult
-            {
-                DiscountName = "First-Time Customer Discount",
-                DiscountAmount = subtotal * FirstTimeCustomerDiscountPercentage
-            };
+            highestPercentage = FirstTimeCustomerDiscountPercentage;
+            discountName = "First-Time Customer Discount";
         }
 
         if (customer.LoyalCustomer &&
             LoyaltyDiscountPercentage > highestPercentage)
         {
-            return new DiscountResult
-            {
-                DiscountName = "Loyal Customer Discount",
-                DiscountAmount = subtotal * LoyaltyDiscountPercentage
-            };
+            highestPercentage = LoyaltyDiscountPercentage;
+            discountName = "Loyal Customer Discount";
         }
 
         return new DiscountResult
         {
-            DiscountName = "No discount",
-            DiscountAmount = 0m
+            DiscountName = discountName,
+            DiscountPercentage = highestPercentage,
+            DiscountAmount = subtotal * highestPercentage
         };
     }
-
-
-
-
-
-
-
-
-
 }
