@@ -9,7 +9,8 @@ namespace RetailOrderStockManagementSystem.Backend.Services
             CreateCustomerRequestDto request);
 
         //Read
-        Task<List<CustomerResponseAdminDto>> GetAllAsync();
+        Task<List<CustomerResponseAdminDto>> GetAllAsync(
+     CustomerQueryParameters? parameters = null);
         Task<CustomerResponseAdminDto?> GetByIdAsync(
             Guid customerId);
 

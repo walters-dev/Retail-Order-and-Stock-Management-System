@@ -21,13 +21,12 @@ namespace RetailOrderStockManagementSystem.Backend.Controllers
 
         //GET /api/customers
         [HttpGet]
-       
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll(
+            [FromQuery]CustomerQueryParameters parameters)
         {
-            var customers = await _customerService.GetAllAsync();
-
+            var customers = await _customerService.GetAllAsync(parameters);
             return Ok(customers);
-        }
+        } 
 
         //GET /api/customers/{id}
         [HttpGet("{id:guid}")]
@@ -53,20 +52,9 @@ namespace RetailOrderStockManagementSystem.Backend.Controllers
             }
             catch (ValidationException exception)
             {
-                return Conflict(new { message = exception.Message });
+                return Conflict(new { message = "A customer with this email or mobile number already exists." });
             }
-            catch (DbUpdateException exception) when (
-                exception.InnerException is PostgresException postgres &&
-                postgres.SqlState == PostgresErrorCodes.UniqueViolation &&
-                (postgres.ConstraintName == "customers_email_key" ||
-                 postgres.ConstraintName == "customers_mobile_number_key"))
-            {
-                return Conflict(new
-                {
-                    message =
-                        "A customer with this email or mobile number already exists."
-                });
-            }
+            
         }
 
         // PUT /api/customers/{id}
@@ -83,31 +71,22 @@ namespace RetailOrderStockManagementSystem.Backend.Controllers
             }
             catch (ValidationException exception)
             {
-                return Conflict(new { message = exception.Message });
+                return Conflict(new { message = "A customer with this email or mobile number already exists." });
             }
-            catch (DbUpdateException exception) when (
-                exception.InnerException is PostgresException postgres &&
-                postgres.SqlState == PostgresErrorCodes.UniqueViolation &&
-                (postgres.ConstraintName == "customers_email_key" ||
-                 postgres.ConstraintName == "customers_mobile_number_key"))
-            {
-                return Conflict(new
-                {
-                    message =
-                        "A customer with this email or mobile number already exists."
-                });
-            }
+            
         }
 
         // DELETE /api/customers/{id}
-        [HttpDelete("{id:guid}")]
+        [HttpPut("{id:guid}/isActive")]
         public async Task<IActionResult> Delete(Guid id)
         {
             bool deleted = await _customerService.DeleteAsync(id);
 
             if (!deleted) return NotFound();
 
-            return NoContent();
+            var customer = await _customerService.GetByIdAsync(id);
+
+            return Ok(customer);
         }
 
     }

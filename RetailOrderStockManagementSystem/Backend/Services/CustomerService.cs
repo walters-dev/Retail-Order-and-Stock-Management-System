@@ -15,9 +15,10 @@ public class CustomerService : ICustomerService
         _repository = repository;
     }
 
-    public async Task<List<CustomerResponseAdminDto>> GetAllAsync()
+    public async Task<List<CustomerResponseAdminDto>> GetAllAsync(
+    CustomerQueryParameters? parameters = null)
     {
-        var customers = await _repository.GetAllAsync();
+        var customers = await _repository.GetAllAsync(parameters);
 
         return customers.Select(MapToDto).ToList();
     }
