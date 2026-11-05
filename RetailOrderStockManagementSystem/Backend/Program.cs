@@ -4,6 +4,7 @@ using RetailOrderStockManagementSystem.Backend.Enums;
 using RetailOrderStockManagementSystem.Backend.Repositories;
 using RetailOrderStockManagementSystem.Backend.Services;
 using RetailOrderStockManagementSystem.Backend.Mapper;
+using RetailOrderStockManagementSystem.Backend.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,7 +34,18 @@ builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IProductRepository,  ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
 
+builder.Services.AddScoped<IOrderRepository,  OrderRepository>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+
+builder.Services.AddScoped<DiscountService>();
+builder.Services.AddScoped<PricingService>();
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
+
 var app = builder.Build();
+
 
 // Temporary connection check.
 using (var scope = app.Services.CreateScope())
@@ -53,6 +65,8 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+app.UseExceptionHandler();
 
 //CORS 
 

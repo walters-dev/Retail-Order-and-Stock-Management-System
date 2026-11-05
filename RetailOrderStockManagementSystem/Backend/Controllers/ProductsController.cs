@@ -23,7 +23,7 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll(ProductQueryParameters parameters)
+    public async Task<IActionResult> GetAll([FromQuery] ProductQueryParameters parameters)
     {
         var products = await _productService.GetAllAsync(parameters);
         return Ok(products);

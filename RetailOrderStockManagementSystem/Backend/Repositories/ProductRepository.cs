@@ -19,6 +19,9 @@ public class ProductRepository : IProductRepository
         var query = _retailDbContext.Products.AsQueryable();
 
         // 1. Filter: which products?
+        if (!parameters.IncludeInactive)
+            query = query.Where(p => p.IsActive);
+
         if (!string.IsNullOrWhiteSpace(parameters.Search))
         {
             var search = parameters.Search.ToLower();

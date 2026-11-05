@@ -1,5 +1,4 @@
-﻿using Microsoft.IdentityModel.Tokens;
-using RetailOrderStockManagementSystem.Backend.DTOs;
+﻿using RetailOrderStockManagementSystem.Backend.DTOs;
 using RetailOrderStockManagementSystem.Backend.Models;
 using RetailOrderStockManagementSystem.Backend.Repositories;
 
@@ -38,12 +37,12 @@ public class ProductService : IProductService
 
             var product = new Product
         {
-            SKU = dto.SKU,
-            Name = dto.Name,
-            Category = dto.Category,
-            UnitPrice = dto.UnitPrice,
+            SKU = sku,
+            Name = dto.Name.Trim(),
+            Category = dto.Category.Trim(),
+            UnitPrice = dto.UnitPrice ?? 0,
             IsActive = true,
-            StockQuantity = dto.StockQuantity
+            StockQuantity = dto.StockQuantity ?? 0
             //,CreatedAt = dto.CreatedAt,
             //UpdatedAt = dto.UpdatedAt
         };
@@ -60,14 +59,18 @@ public class ProductService : IProductService
         if (product == null)
             return false;
 
-        if (await _repository.SkuExistsAsync(sku))
+        if (await _repository.SkuExistsAsync(sku, id))
             throw new ArgumentException($"A product with this sku ({sku}) already exists.");
 
-        product.SKU = dto.SKU;
-        product.Name = dto.Name;
-        product.Category = dto.Category;
+        product.SKU = sku;
+        product.Name = dto.Name.Trim();
+        product.Category = dto.Category.Trim();
         product.UnitPrice = dto.UnitPrice;
         product.StockQuantity = dto.StockQuantity;
+        product.IsActive = dto.IsActive ?? false;
+
+        product.UpdatedAt = DateOnly.FromDateTime(DateTime.UtcNow);
+
 
         await _repository.UpdateAsync(id);
         return true;
