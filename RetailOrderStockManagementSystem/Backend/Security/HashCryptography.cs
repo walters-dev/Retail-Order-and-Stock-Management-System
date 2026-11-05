@@ -16,12 +16,11 @@ namespace RetailOrderStockManagementSystem.Backend.Security
 			return BCrypt.Net.BCrypt.HashPassword(password, 12);// bcrypt stores salt with hashed password 
 
 		}
-		/*
-		public bool VerifyPassword(Admins enteredAdmin)//checks if password is the same as the password in database
+		
+		public bool VerifyPassword(string enteredPassword, string existingPassword)//checks if password is the same as the password in database
 		{
-            hashedpassword = _adminService.FindAdminPassword(enteredAdmin.Username).AdminPassword;//finds the admin in storage
             //hashes enteredpassword with the salt in hashpassword then compares 2
-            var isValid = BCrypt.Net.BCrypt.Verify(enteredAdmin.AdminPassword, hashedpassword);
+            var isValid = BCrypt.Net.BCrypt.Verify(enteredPassword, existingPassword);
 			if (isValid)
 			{
 				return true;
@@ -31,7 +30,7 @@ namespace RetailOrderStockManagementSystem.Backend.Security
 				return false;
 			}
 
-		}*/
+		}
 		
 	}
 }

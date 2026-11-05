@@ -16,11 +16,12 @@ namespace RetailOrderStockManagementSystem.Backend.Security
         }
         public string GenerateToken(User user)
         {
+            
             //read settings from secrets.json
             string issuer = _configuration["Jwt:Issuer"]!;
             string audience = _configuration["Jwt:Audience"]!;
-            string secret = _configuration["Jwt:Secrets"]!;
-
+            string secret = _configuration["Jwt:Secret"]!;
+            Console.WriteLine(issuer);
             //generating secret key
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);//might wanna change this

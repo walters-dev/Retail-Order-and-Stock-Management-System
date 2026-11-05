@@ -1,4 +1,5 @@
 ﻿using RetailOrderStockManagementSystem.Backend.Enums;
+using System.Text.Json.Serialization;
 
 namespace RetailOrderStockManagementSystem.Backend.Models
 {
@@ -10,6 +11,7 @@ namespace RetailOrderStockManagementSystem.Backend.Models
         public decimal Subtotal { get; set; }
         public decimal DiscountAmount { get; set; }
         public decimal FinalTotal { get; set; }
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public OrderStatus.Status Status { get; set; }
         public DateOnly CreatedAt { get; set; }
         public DateOnly? UpdatedAt { get; set; }

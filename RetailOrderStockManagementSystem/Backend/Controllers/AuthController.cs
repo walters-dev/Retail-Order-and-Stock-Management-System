@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +8,7 @@ using RetailOrderStockManagementSystem.Backend.DTOs;
 using RetailOrderStockManagementSystem.Backend.Enums;
 using RetailOrderStockManagementSystem.Backend.Models;
 using RetailOrderStockManagementSystem.Backend.Security;
+using RetailOrderStockManagementSystem.Backend.Services;
 
 namespace RetailOrderStockManagementSystem.Backend.Controllers
 {
@@ -14,12 +16,14 @@ namespace RetailOrderStockManagementSystem.Backend.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly RetailDbContext _context;
+        private readonly IAuthService _service;
         private readonly JwtTokenGenerator _jwtTokenGenerator;
-        public AuthController(RetailDbContext context, JwtTokenGenerator jwtTokenGenerator)
+        private readonly IMapper _mapper;
+        public AuthController(IAuthService service, JwtTokenGenerator jwtTokenGenerator, IMapper mapper)
         {
-            _context = context;
+            _service = service;
             _jwtTokenGenerator = jwtTokenGenerator;
+            _mapper = mapper;
         }
         [HttpPost]
         public async Task<IActionResult> AddAsyncUser(CreateUserRequestDto dto)
@@ -33,10 +37,11 @@ namespace RetailOrderStockManagementSystem.Backend.Controllers
                     Details = ModelState
                 });
             }
-            string username = dto.Username.Trim();
-            string password = dto.Password.Trim();
-            string email= dto.Email.Trim();
-            bool usernameExists = await _context.Users.AnyAsync(u => u.Username == username);
+            dto.Username = dto.Username.Trim();
+            dto.Password = dto.Password.Trim();
+            dto.Email = dto.Email.Trim();
+            //check username exist service
+            bool usernameExists = await _service.usernameExist(dto.Username);
             if (usernameExists)
             {
                 return Conflict(new ApiErrorResponseDto
@@ -45,8 +50,9 @@ namespace RetailOrderStockManagementSystem.Backend.Controllers
                     Message = "Username already exists."
                 });
             }
-            bool emailExists = await _context.Users.AnyAsync(u => u.Username == username);
-            if (usernameExists)
+            //check email exist service
+            bool emailExists = await _service.emailExist(dto.Email);
+            if (emailExists)
             {
                 return Conflict(new ApiErrorResponseDto
                 {
@@ -55,36 +61,54 @@ namespace RetailOrderStockManagementSystem.Backend.Controllers
                 });
             }
             Encryption encryption = new Encryption();
-            string hashedPassword = encryption.HashPassword(password);
-            Users.UserTypes type;
-            switch (dto.Type)
+            dto.Password = encryption.HashPassword(dto.Password);
+
+            //save service here
+            await _service.CreateUserAsync(dto);
+            return StatusCode(201,new {message = "User created successfully."});//CreatedAt doesnt work bcs you need AdminbyId
+        }
+        [HttpPost("Login")]
+        public async Task<IActionResult> Login(LogInRequestDto dto)
+        {
+            if (!ModelState.IsValid)
             {
-                case "Staff":
-                    type = Users.UserTypes.Staff;
-                    break;
-                case "Admin":
-                    type = Users.UserTypes.Admin;
-                    break;
-                case "Manager":
-                    type = Users.UserTypes.Manager;
-                    break;
-                default:
-                    return BadRequest(new ApiErrorResponseDto
-                    {
-                        Error = "InvalidUserType",
-                        Message = "Entered User Type does not exist."
-                    });
+                return BadRequest(new ApiErrorResponseDto
+                {
+                    Error = "ValidationFailed",
+                    Message = "Request validation failed.",
+                    Details = ModelState
+                });
             }
-            var user = new User
+            dto.Username = dto.Username.Trim();
+            dto.Password = dto.Password.Trim();
+            //find by username
+            var user = await _service.GetbyUsernameAsync(dto.Username);
+            if (user == null)
             {
-                Username = username,
-                Email = email,
-                Password = hashedPassword,
-                Type = type,
-            };
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction("User successfully created.");
+                return Unauthorized(new ApiErrorResponseDto
+                {
+                    Error = "Unauthorized",
+                    Message = "Invalid username or password"
+                });
+            }
+            Encryption encryption = new Encryption();
+            bool loggedin = encryption.VerifyPassword(dto.Password, user.Password);
+            if (!loggedin)
+            {
+                return Unauthorized(new ApiErrorResponseDto
+                {
+                    Error = "Unauthorized",
+                    Message = "Invalid username or password"
+                });
+            }
+            var newuser = _mapper.Map<User>(user);
+            string token = _jwtTokenGenerator.GenerateToken(newuser);
+            return Ok(new
+            {
+                token,
+                expiresInSeconds = 3600,
+                role = user.Type
+            });
         }
     }
 }

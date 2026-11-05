@@ -29,7 +29,6 @@
 
   <ItemGroup>
     <Folder Include="Backend\Data\" />
-    <Folder Include="Backend\Services\" />
     <Folder Include="Frontend\" />
   </ItemGroup>
 

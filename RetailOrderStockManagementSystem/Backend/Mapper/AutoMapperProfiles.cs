@@ -1,7 +1,8 @@
-﻿using RetailOrderStockManagementSystem.Backend.DTOs;
+﻿using AutoMapper;
+using RetailOrderStockManagementSystem.Backend.DTOs;
+using RetailOrderStockManagementSystem.Backend.Enums;
 using RetailOrderStockManagementSystem.Backend.Models;
 using System.Runtime.InteropServices;
-using AutoMapper;
 
 namespace RetailOrderStockManagementSystem.Backend.Mapper
 {
@@ -9,17 +10,17 @@ namespace RetailOrderStockManagementSystem.Backend.Mapper
     {
         public AutoMapperProfiles()
         {
-            CreateMap<Customer, CustomerResponseAdminDto>();
-            CreateMap<Customer, CreateCustomerRequestDto>();
-            CreateMap<Customer, UpdateCustomerRequestDto>();
-            CreateMap<Customer, CustomerResponseStaffDto>();
-            CreateMap<Product, CreateProductRequestDto>();
-            CreateMap<Product, UpdateProductRequestDto>();
-            CreateMap<Product, ProductResponseAdminDto>();
-            CreateMap<Order, OrderResponseAdminDto>();
-            CreateMap<Order, OrderResponseStaffDto>();
-            CreateMap<User, CreateUserRequestDto>();
-            //do i need a user response sign and request?
+            CreateMap<CustomerResponseAdminDto, Customer>().ReverseMap();
+            CreateMap<Customer, CreateCustomerRequestDto>().ReverseMap();
+            CreateMap<Customer, UpdateCustomerRequestDto>().ReverseMap();
+            CreateMap<CustomerResponseStaffDto, Customer>().ReverseMap();
+            CreateMap<Product, CreateProductRequestDto>().ReverseMap();
+            CreateMap<Product, UpdateProductRequestDto>().ReverseMap();
+            CreateMap<ProductResponseAdminDto, Product>().ReverseMap();
+            CreateMap<OrderResponseAdminDto, Order>().ReverseMap();
+            CreateMap<OrderResponseStaffDto, Order>().ReverseMap();
+            CreateMap<User, CreateUserRequestDto>().ReverseMap();
+            CreateMap<User, LogInRequestDto>().ReverseMap();
         }
     }
 }
