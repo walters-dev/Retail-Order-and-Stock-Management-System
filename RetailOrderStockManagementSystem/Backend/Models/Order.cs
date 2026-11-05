@@ -9,6 +9,7 @@ namespace RetailOrderStockManagementSystem.Backend.Models
         public Guid CustomerId { get; set; }
         public DateOnly OrderDate { get; set; }
         public decimal Subtotal { get; set; }
+        //public decimal DiscountPercent { get; set; }
         public decimal DiscountAmount { get; set; }
         public decimal FinalTotal { get; set; }
         [JsonConverter(typeof(JsonStringEnumConverter))]

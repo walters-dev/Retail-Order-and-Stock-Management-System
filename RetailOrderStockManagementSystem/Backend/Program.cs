@@ -69,7 +69,11 @@ builder.Services.AddDbContext<RetailDbContext>(options =>
         postgres.MapEnum<OrderStatus.Status>("order_status", "public");
         postgres.MapEnum<Users.UserTypes>("user_type", "public");
     }));
+builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+builder.Services.AddScoped<ICustomerService, CustomerService>();
 
+builder.Services.AddScoped<IProductRepository,  ProductRepository>();
+builder.Services.AddScoped<IProductService, ProductService>();
 
 var app = builder.Build();
 
