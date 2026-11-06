@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -25,9 +26,11 @@ namespace RetailOrderStockManagementSystem.Backend.Controllers
             _jwtTokenGenerator = jwtTokenGenerator;
             _mapper = mapper;
         }
+        [Authorize(Roles = "Manager")]
         [HttpPost]
         public async Task<IActionResult> AddAsyncUser(CreateUserRequestDto dto)
         {
+            //checks if its bindable
             if (!ModelState.IsValid)
             {
                 return BadRequest(new ApiErrorResponseDto
@@ -40,7 +43,7 @@ namespace RetailOrderStockManagementSystem.Backend.Controllers
             dto.Username = dto.Username.Trim();
             dto.Password = dto.Password.Trim();
             dto.Email = dto.Email.Trim();
-            //check username exist service
+            //check username exist in database service
             bool usernameExists = await _service.usernameExist(dto.Username);
             if (usernameExists)
             {
@@ -61,7 +64,7 @@ namespace RetailOrderStockManagementSystem.Backend.Controllers
                 });
             }
             Encryption encryption = new Encryption();
-            dto.Password = encryption.HashPassword(dto.Password);
+            dto.Password = encryption.HashPassword(dto.Password);//hashes password to be placed in database
 
             //save service here
             await _service.CreateUserAsync(dto);
@@ -70,6 +73,7 @@ namespace RetailOrderStockManagementSystem.Backend.Controllers
         [HttpPost("Login")]
         public async Task<IActionResult> Login(LogInRequestDto dto)
         {
+            //checks if its bindable
             if (!ModelState.IsValid)
             {
                 return BadRequest(new ApiErrorResponseDto
@@ -79,9 +83,10 @@ namespace RetailOrderStockManagementSystem.Backend.Controllers
                     Details = ModelState
                 });
             }
+            //gets rid of spaces at the end
             dto.Username = dto.Username.Trim();
             dto.Password = dto.Password.Trim();
-            //find by username
+            //find by username in database
             var user = await _service.GetbyUsernameAsync(dto.Username);
             if (user == null)
             {
@@ -92,7 +97,7 @@ namespace RetailOrderStockManagementSystem.Backend.Controllers
                 });
             }
             Encryption encryption = new Encryption();
-            bool loggedin = encryption.VerifyPassword(dto.Password, user.Password);
+            bool loggedin = encryption.VerifyPassword(dto.Password, user.Password);//hashes pass with salt to check if it is correct
             if (!loggedin)
             {
                 return Unauthorized(new ApiErrorResponseDto
@@ -102,6 +107,7 @@ namespace RetailOrderStockManagementSystem.Backend.Controllers
                 });
             }
             var newuser = _mapper.Map<User>(user);
+            //creates token for user logging in with role so they have access to correct endpoints
             string token = _jwtTokenGenerator.GenerateToken(newuser);
             return Ok(new
             {

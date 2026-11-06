@@ -21,6 +21,7 @@ namespace RetailOrderStockManagementSystem.Backend.Services
         {
             var user = _mapper.Map<User>(dto);
             var repoUser =  await _repository.AddUserAsync(user);
+            //logs error in terminal 
             _logger.LogInformation("Created user {UserId} {UserUsername}", repoUser.UserId, repoUser.Username);
             return _mapper.Map<LogInRequestDto>(repoUser);
         }
@@ -31,6 +32,7 @@ namespace RetailOrderStockManagementSystem.Backend.Services
             {
                 return false;
             }
+            //logs error in terminal 
             _logger.LogWarning("User {UserUsername} already exists", username);
             return true;
         }
@@ -41,11 +43,13 @@ namespace RetailOrderStockManagementSystem.Backend.Services
             {
                 return false;
             }
+            //logs error in terminal 
             _logger.LogWarning("User {UserEmail} already exists", email);
             return true;
         }
         public async Task<LogInRequestDto?> GetbyUsernameAsync(string username)
         {
+            //logs error in terminal 
             _logger.LogInformation("Retrieving user {UserUsername}", username);
             var user = await _repository.GetbyUsernameAsync(username);
             if (user == null)
