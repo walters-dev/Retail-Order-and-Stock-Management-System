@@ -33,7 +33,7 @@ public class OrderController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
-        var order = await _orderService.GetByIdAscync(id);
+        var order = await _orderService.GetByIdAsync(id);
 
         if (order == null)
             return NotFound();

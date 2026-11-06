@@ -100,6 +100,16 @@ builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
 
+builder.Services.AddScoped<IOrderRepository,  OrderRepository>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+
+builder.Services.AddScoped<DiscountService>();
+builder.Services.AddScoped<PricingService>();
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
+
 var app = builder.Build();
 
 app.UseExceptionHandler();
@@ -125,6 +135,8 @@ if (app.Environment.IsDevelopment())
     //app.UseSwaggerUI();
     app.UseSwaggerUI(options => options.SwaggerEndpoint("/openapi/v1.json", "Retail-Order-and-Stock-Management-System v1"));
 }
+
+app.UseExceptionHandler();
 
 //CORS 
 

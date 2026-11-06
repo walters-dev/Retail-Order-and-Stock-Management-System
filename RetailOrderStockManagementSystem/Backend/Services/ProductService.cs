@@ -1,6 +1,7 @@
 ﻿using RetailOrderStockManagementSystem.Backend.DTOs;
 using RetailOrderStockManagementSystem.Backend.Models;
 using RetailOrderStockManagementSystem.Backend.Repositories;
+using System.ComponentModel.DataAnnotations;
 
 namespace RetailOrderStockManagementSystem.Backend.Services;
 
@@ -13,63 +14,87 @@ public class ProductService : IProductService
         _repository = repository;
     }
 
+    // GET all products
     public async Task<List<ProductResponseAdminDto>> GetAllAsync(ProductQueryParameters parameters)
     {
         var products = await _repository.GetAllAsync(parameters);
         return products.Select(MapToDto).ToList();
     }
 
+    // GET product ById, returns null if product is not found
     public async Task<ProductResponseAdminDto?> GetByIdAsync(int id)
     {
         var product = await _repository.GetByIdAsync(id);
         return product == null ? null : MapToDto(product);
     }
 
+    // POST new product
     public async Task<ProductResponseAdminDto> CreateAsync(CreateProductRequestDto dto)
     {
-        var product = new Product
+        string sku = dto.SKU.Trim();
+
+        if (string.IsNullOrEmpty(sku))
+            throw new ArgumentException("SKU is required.");
+
+        if (await _repository.SkuExistsAsync(sku))
+            throw new ArgumentException($"A product with this sku ({sku}) already exists.");
+
+            var product = new Product
         {
-            SKU = dto.SKU,
-            Name = dto.Name,
-            Category = dto.Category,
-            UnitPrice = dto.UnitPrice,
-            StockQuantity = dto.StockQuantity
+            SKU = sku,
+            Name = dto.Name.Trim(),
+            Category = dto.Category.Trim(),
+            UnitPrice = dto.UnitPrice ?? 0,
+            IsActive = true,
+            StockQuantity = dto.StockQuantity ?? 0,
+            CreatedAt = DateOnly.FromDateTime(DateTime.UtcNow),
+            UpdatedAt = null
         };
 
-        product = await _repository.AddAsync(product);
-        return MapToDto(product);
+        var newProduct = await _repository.AddAsync(product);
+        return MapToDto(newProduct);
     }
 
-    public async Task<bool> UpdateAsync(int id, UpdateProductRequestDto dto)
+    public async Task<bool> UpdateAsync(UpdateProductRequestDto dto, int id)
+    {
+        var product = await _repository.GetByIdAsync(id);
+        if (product == null)
+            return false;
+
+        string sku = dto.SKU.Trim();
+        if (await _repository.SkuExistsAsync(sku, id))
+            throw new ArgumentException
+                ($"A product with this sku ({sku}) already exists.");
+
+        product.SKU = sku;
+        product.Name = dto.Name.Trim();
+        product.Category = dto.Category.Trim();
+        product.UnitPrice = dto.UnitPrice;
+        product.StockQuantity = dto.StockQuantity;
+        product.IsActive = dto.IsActive ?? false;
+        //product.CreatedAt = dto.CreatedAt,
+        product.UpdatedAt = DateOnly.FromDateTime(DateTime.UtcNow);
+
+
+        await _repository.UpdateAsync(id);
+        return true;
+    }
+
+    public async Task<bool> DeleteAsync(int id)
     {
         var product = await _repository.GetByIdAsync(id);
 
         if (product == null)
             return false;
 
-        product.SKU = dto.SKU;
-        product.Name = dto.Name;
-        product.Category = dto.Category;
-        product.UnitPrice = dto.UnitPrice;
-        product.StockQuantity = dto.StockQuantity;
+        product.IsActive = false;
 
-        await _repository.UpdateAsync(product);
         return true;
     }
 
-    //public async Task<bool> DeleteAsync(int id)
-    //{
-    //    var product = await _repository.GetByIdAsync(id);
-
-    //    if (product == null)
-    //        return false;
-
-    //    await _repository.DeleteAsync(product);
-    //    return true;
-    //}
-
     private static ProductResponseAdminDto MapToDto(Product p) => new()
     {
+        ProductId = p.ProductId,
         SKU = p.SKU,
         Name = p.Name,
         Category = p.Category,

@@ -4,7 +4,7 @@ using RetailOrderStockManagementSystem.Backend.Repositories;
 
 namespace RetailOrderStockManagementSystem.Backend.Services;
 
-public class OrderService
+public class OrderService : IOrderService
 {
     private readonly IOrderRepository _repository;
 
@@ -19,13 +19,13 @@ public class OrderService
         return orders.Select(MapToDto).ToList();
     }
 
-    public async Task<OrderResponseAdminDto?> GetByIdAscync(int id)
+    public async Task<OrderResponseAdminDto?> GetByIdAsync(int id)
     {
         var order = await _repository.GetByIdAsync(id);
         return order == null ? null : MapToDto(order);
     }
 
-    public async Task<OrderResponseAdminDto> CreateAsync(Order o)
+    public async Task<OrderResponseAdminDto> CreateAsync(Order order)
     {
         /* Add validation below (from bussiness rules)
          * Customer active? Every order must belong to a valid customer.
@@ -39,11 +39,10 @@ public class OrderService
 
         var newOrder = new Order
         {
-            OrderDate = o.OrderDate,
-            Subtotal = o.Subtotal,
-
-            FinalTotal = o.FinalTotal,
-            Status = o.Status
+            OrderDate = order.OrderDate,
+            Subtotal = order.Subtotal,
+            FinalTotal = order.FinalTotal,
+            Status = order.Status
         };
 
         newOrder = await _repository.AddAsync(newOrder);
@@ -52,6 +51,8 @@ public class OrderService
 
     private static OrderResponseAdminDto MapToDto(Order o) => new()
     {
+        OrderId = o.OrderId,
+        CustomerId = o.CustomerId,
         OrderDate = o.OrderDate,
         Subtotal = o.Subtotal,
 

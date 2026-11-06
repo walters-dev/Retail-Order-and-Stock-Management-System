@@ -14,11 +14,15 @@ public class ProductRepository : IProductRepository
         _retailDbContext = retailDbContext;
     }
 
+    // GET all products (active)
     public async Task<List<Product>> GetAllAsync(ProductQueryParameters parameters)
     {
         var query = _retailDbContext.Products.AsQueryable();
 
         // 1. Filter: which products?
+        if (!parameters.IncludeInactive)
+            query = query.Where(p => p.IsActive);
+
         if (!string.IsNullOrWhiteSpace(parameters.Search))
         {
             var search = parameters.Search.ToLower();
@@ -42,11 +46,13 @@ public class ProductRepository : IProductRepository
         return await query.ToListAsync();
     }
 
+    // GET product ById, returns null if product is not found
     public async Task<Product?> GetByIdAsync(int id)
     {
         return await _retailDbContext.Products.FindAsync(id);
     }
 
+    // POST new product
     public async Task<Product> AddAsync(Product product)
     {
         _retailDbContext.Products.Add(product);
@@ -54,12 +60,28 @@ public class ProductRepository : IProductRepository
         return product;
     }
 
-    public async Task UpdateAsync(Product product)
+    // PUT product using ProductId
+    public async Task<bool> UpdateAsync(int id)
     {
-        _retailDbContext.Products.Update(product);
+        // Retrieve existing product from the database
+        var product = await _retailDbContext.Products.FindAsync(id);
+
+        // Return null if Product doesn't exist
+        if (product == null)
+        {
+            return false;
+        }
+
+        // Update status instead of removing the record
+        //_retailDbContext.Products.Update(product);
+        product.UpdatedAt = DateOnly.FromDateTime(DateTime.UtcNow);
+
+        // Persist/save changes to the database
         await _retailDbContext.SaveChangesAsync();
+        return true;
     }
 
+    // Delete product changes product status to inactive
     public async Task<bool> DeleteAsync(int id)
     {
         // Retrieve existing product from the database
@@ -79,4 +101,18 @@ public class ProductRepository : IProductRepository
         await _retailDbContext.SaveChangesAsync();
         return true;
     }
+
+    public async Task<bool> SkuExistsAsync(string sku, int? excludedProductId = null)
+    {
+        var query = _retailDbContext.Products.Where(product => product.SKU == sku);
+
+        if (excludedProductId.HasValue)
+        {
+            int productId = excludedProductId.Value;
+            query = query.Where(product => product.SKU != sku);
+        }
+
+        return await query.AnyAsync();
+    }
+
 }

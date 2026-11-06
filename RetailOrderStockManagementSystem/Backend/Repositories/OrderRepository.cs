@@ -13,16 +13,19 @@ public class OrderRepository : IOrderRepository
         _retailDbContext = retailDbContext;
     }
 
+    // GET all orders
     public async Task<List<Order>> GetAllAsync()
     {
         return await _retailDbContext.Orders.ToListAsync();
     }
 
+    // GET orders ById, returns null if order is not found
     public async Task<Order?> GetByIdAsync(int id)
     {
         return await _retailDbContext.Orders.FindAsync(id);
     }
 
+    // POST new order, create a pending order
     public async Task<Order> AddAsync(Order order)
     {
         _retailDbContext.Orders.Add(order);
@@ -30,6 +33,7 @@ public class OrderRepository : IOrderRepository
         return order;
     }
 
+    // PUT order, update stock
     public async Task UpdateAsync(Order order)
     {
         _retailDbContext.Orders.Update(order);
