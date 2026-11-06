@@ -44,9 +44,9 @@ public class ProductService : IProductService
             SKU = sku,
             Name = dto.Name.Trim(),
             Category = dto.Category.Trim(),
-            UnitPrice = dto.UnitPrice ?? 0,
+            UnitPrice = dto.UnitPrice,
             IsActive = true,
-            StockQuantity = dto.StockQuantity ?? 0,
+            StockQuantity = dto.StockQuantity,
             CreatedAt = DateOnly.FromDateTime(DateTime.UtcNow),
             UpdatedAt = null
         };
@@ -71,7 +71,7 @@ public class ProductService : IProductService
         product.Category = dto.Category.Trim();
         product.UnitPrice = dto.UnitPrice;
         product.StockQuantity = dto.StockQuantity;
-        product.IsActive = dto.IsActive ?? false;
+        product.IsActive = dto.IsActive;
         //product.CreatedAt = dto.CreatedAt,
         product.UpdatedAt = DateOnly.FromDateTime(DateTime.UtcNow);
 

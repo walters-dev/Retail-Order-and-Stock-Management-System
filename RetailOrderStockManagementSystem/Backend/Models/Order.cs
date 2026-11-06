@@ -19,5 +19,12 @@ namespace RetailOrderStockManagementSystem.Backend.Models
         public int? DiscountRuleId { get; set; }
         public int ReceiptId { get; set; }
         //public bool LargeOrder { get; set; }
+
+        // navigates EF to return related Customer for order details
+        public Customer? Customer { get; set; } 
+
+        // Creates OrderLineItem for each requested Product,
+        // then assigns that to the OrderLineItems list
+        public List<OrderLineItem> OrderLineItems { get; set; } = new(); 
     }
 }

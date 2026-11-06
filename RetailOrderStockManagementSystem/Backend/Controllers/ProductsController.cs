@@ -31,14 +31,14 @@ public class ProductsController : ControllerBase
         {
             return Conflict(new { message = ex.Message });
         }
-        catch (DbUpdateException ex) when
-                (ex.InnerException is PostgresException postgres && postgres.SqlState
-                == PostgresErrorCodes.UniqueViolation &&
-                (postgres.ConstraintName == "products_sku"))
-        {
-            return Conflict(
-                new { message = "A product with this SKU already exists." });
-        }          
+        //catch (DbUpdateException ex) when
+        //        (ex.InnerException is PostgresException postgres && postgres.SqlState
+        //        == PostgresErrorCodes.UniqueViolation &&
+        //        (postgres.ConstraintName == "products_sku"))
+        //{
+        //    return Conflict(
+        //        new { message = "A product with this SKU already exists." });
+        //}          
     }
 
     // GET/api/products

@@ -18,11 +18,13 @@ namespace RetailOrderStockManagementSystem.Backend.DTOs
         public string Category { get; set; } = string.Empty;
         
         [Required(ErrorMessage = "UnitPrice is required.")]
+        [RegularExpression(@"^(((\d{1,2})(,\d{2})*)|(\d+))(.\d+)?$", ErrorMessage = "UnitPrice must be a valid decimal.")]//checks if its a decimal
         [Range(0.01, 9999.99, ErrorMessage = "Unit Price must be within the range of 0,01-9999,99.")]
-        public decimal? UnitPrice { get; set; }
+        public decimal UnitPrice { get; set; }
         
         [Required(ErrorMessage = "StockQuantity is required.")]
+        [RegularExpression("^[0-9]+$", ErrorMessage = "Stock Quantity must be a whole number.")]
         [Range(0, 9999, ErrorMessage = "Stock quantity must be within the range of 0-9999.")]
-        public int? StockQuantity { get; set; }
+        public int StockQuantity { get; set; }
     }
 }

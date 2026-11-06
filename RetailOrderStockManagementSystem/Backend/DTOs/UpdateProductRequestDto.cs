@@ -25,6 +25,6 @@ namespace RetailOrderStockManagementSystem.Backend.DTOs
         [Range(0, 9999, ErrorMessage = "Stock quantity must be within the range of 0-9999.")]
         public int StockQuantity { get; set; }
 
-        public bool? IsActive { get; set; }
+        public bool IsActive { get; set; }
     }
 }

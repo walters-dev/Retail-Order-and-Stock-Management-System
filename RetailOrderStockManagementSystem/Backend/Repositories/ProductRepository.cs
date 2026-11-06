@@ -73,8 +73,8 @@ public class ProductRepository : IProductRepository
         }
 
         // Update status instead of removing the record
-        //_retailDbContext.Products.Update(product);
         product.UpdatedAt = DateOnly.FromDateTime(DateTime.UtcNow);
+        _retailDbContext.Products.Update(product);
 
         // Persist/save changes to the database
         await _retailDbContext.SaveChangesAsync();
