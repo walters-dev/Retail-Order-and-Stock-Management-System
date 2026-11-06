@@ -55,7 +55,7 @@ public class OrderService : IOrderService
         CustomerId = o.CustomerId,
         OrderDate = o.OrderDate,
         Subtotal = o.Subtotal,
-        //DiscountPercent = order.DiscountPercent,
+
         DiscountAmount = o.DiscountAmount,
         FinalTotal = o.FinalTotal,
         Status = o.Status,

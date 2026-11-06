@@ -1,4 +1,5 @@
 ﻿using RetailOrderStockManagementSystem.Backend.Models;
+using RetailOrderStockManagementSystem.Backend.DTOs;
 
 namespace RetailOrderStockManagementSystem.Backend.Repositories
 {
@@ -6,7 +7,8 @@ namespace RetailOrderStockManagementSystem.Backend.Repositories
     {
         Task<Customer> AddAsync(Customer customer);
 
-        Task<List<Customer>> GetAllAsync();
+        Task<List<Customer>> GetAllAsync(
+    CustomerQueryParameters? parameters = null);
 
         Task<Customer?> GetByIdAsync(Guid customerId);
 
