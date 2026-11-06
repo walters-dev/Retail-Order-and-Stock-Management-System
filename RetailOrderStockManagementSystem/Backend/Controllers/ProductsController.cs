@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using RetailOrderStockManagementSystem.Backend.DTOs;
 using RetailOrderStockManagementSystem.Backend.Services;
+using System.ComponentModel.DataAnnotations;
 
 namespace RetailOrderStockManagementSystem.Backend.Controllers;
 
@@ -15,13 +18,30 @@ public class ProductsController : ControllerBase
         _productService = productService;
     }
 
+    // POST/api/products
     [HttpPost]
-    public async Task<IActionResult> Create(CreateProductRequestDto dto)
+    public async Task<IActionResult> Create([FromBody] CreateProductRequestDto dto)
     {
-        var product = await _productService.CreateAsync(dto);
-        return CreatedAtAction(nameof(GetById), new { id = product.ProductId }, product);
+        try
+        {
+            var createdProduct = await _productService.CreateAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = createdProduct.ProductId }, createdProduct);
+        }
+        catch (ValidationException ex)
+        {
+            return Conflict(new { message = ex.Message });
+        }
+        catch (DbUpdateException ex) when
+                (ex.InnerException is PostgresException postgres && postgres.SqlState
+                == PostgresErrorCodes.UniqueViolation &&
+                (postgres.ConstraintName == "products_sku"))
+        {
+            return Conflict(
+                new { message = "A product with this SKU already exists." });
+        }          
     }
 
+    // GET/api/products
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] ProductQueryParameters parameters)
     {
@@ -29,6 +49,7 @@ public class ProductsController : ControllerBase
         return Ok(products);
     }
 
+    // GET/api/products/{id}
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
@@ -40,17 +61,34 @@ public class ProductsController : ControllerBase
         return Ok(product);
     }
 
+    // PUT/api/products/{id}
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, UpdateProductRequestDto dto)
+    public async Task<IActionResult> Update(int id, [FromBody] UpdateProductRequestDto dto)
     {
-        var updatedProduct = await _productService.UpdateAsync(dto, id);
-        return updatedProduct ? NoContent() : NotFound();
+        try
+        {
+            var updatedProduct = await _productService.UpdateAsync(dto, id);
+            return updatedProduct ? NoContent() : NotFound();
+        }
+        catch (ValidationException ex)
+        {
+            return Conflict(new { message = ex.Message });
+        }
+        catch (DbUpdateException ex) when
+        (ex.InnerException is PostgresException postgres && postgres.SqlState
+        == PostgresErrorCodes.UniqueViolation && 
+        (postgres.ConstraintName == "product_sku"))
+        {
+            return Conflict( 
+                new { message = "A product with this sku already exists."});
+        }
     }
 
-    //[HttpDelete]
-    //public async Task<IActionResult> Delete(int id)
-    //{
-    //    var deletedProduct = await _productService.DeleteAsync(id);
-    //    return deletedProduct ? NoContent() : NotFound();
-    //}
+    // DELETE/api/products/{id}
+    [HttpDelete]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var isProduct = await _productService.DeleteAsync(id);
+        return isProduct ? NoContent() : NotFound();
+    }
 }

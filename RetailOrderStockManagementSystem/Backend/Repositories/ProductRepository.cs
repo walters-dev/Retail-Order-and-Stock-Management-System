@@ -14,6 +14,7 @@ public class ProductRepository : IProductRepository
         _retailDbContext = retailDbContext;
     }
 
+    // GET all products (active)
     public async Task<List<Product>> GetAllAsync(ProductQueryParameters parameters)
     {
         var query = _retailDbContext.Products.AsQueryable();
@@ -45,11 +46,13 @@ public class ProductRepository : IProductRepository
         return await query.ToListAsync();
     }
 
+    // GET product ById, returns null if product is not found
     public async Task<Product?> GetByIdAsync(int id)
     {
         return await _retailDbContext.Products.FindAsync(id);
     }
 
+    // POST new product
     public async Task<Product> AddAsync(Product product)
     {
         _retailDbContext.Products.Add(product);
@@ -57,6 +60,7 @@ public class ProductRepository : IProductRepository
         return product;
     }
 
+    // PUT product using ProductId
     public async Task<bool> UpdateAsync(int id)
     {
         // Retrieve existing product from the database
@@ -77,6 +81,7 @@ public class ProductRepository : IProductRepository
         return true;
     }
 
+    // Delete product changes product status to inactive
     public async Task<bool> DeleteAsync(int id)
     {
         // Retrieve existing product from the database
