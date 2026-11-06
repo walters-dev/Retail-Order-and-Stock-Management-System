@@ -9,7 +9,7 @@ namespace RetailOrderStockManagementSystem.Backend.Models
         public string Email { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<Users.UserTypes>))]
         public Users.UserTypes Type { get; set; }
     }
 }
