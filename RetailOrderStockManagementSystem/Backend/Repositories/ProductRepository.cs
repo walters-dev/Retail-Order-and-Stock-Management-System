@@ -15,7 +15,7 @@ public class ProductRepository : IProductRepository
     }
 
     // GET all products (active)
-    public async Task<List<Product>> GetAllAsync(ProductQueryParameters parameters)
+    public async Task<List<Product>> GetAllAsync(ProductQueryParameters? parameters = null)
     {
         var query = _retailDbContext.Products.AsQueryable();
 
@@ -56,7 +56,9 @@ public class ProductRepository : IProductRepository
     public async Task<Product> AddAsync(Product product)
     {
         _retailDbContext.Products.Add(product);
+
         await _retailDbContext.SaveChangesAsync();
+
         return product;
     }
 
@@ -81,7 +83,7 @@ public class ProductRepository : IProductRepository
         return true;
     }
 
-    // Delete product changes product status to inactive
+    // Delete product changes product status to inactive instead of deleting the product
     public async Task<bool> DeleteAsync(int id)
     {
         // Retrieve existing product from the database

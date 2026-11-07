@@ -25,20 +25,13 @@ public class ProductsController : ControllerBase
         try
         {
             var createdProduct = await _productService.CreateAsync(dto);
+
             return CreatedAtAction(nameof(GetById), new { id = createdProduct.ProductId }, createdProduct);
         }
         catch (ValidationException ex)
         {
             return Conflict(new { message = ex.Message });
-        }
-        //catch (DbUpdateException ex) when
-        //        (ex.InnerException is PostgresException postgres && postgres.SqlState
-        //        == PostgresErrorCodes.UniqueViolation &&
-        //        (postgres.ConstraintName == "products_sku"))
-        //{
-        //    return Conflict(
-        //        new { message = "A product with this SKU already exists." });
-        //}          
+        }         
     }
 
     // GET/api/products
@@ -50,45 +43,46 @@ public class ProductsController : ControllerBase
     }
 
     // GET/api/products/{id}
-    [HttpGet("{id}")]
+    [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {
         var product = await _productService.GetByIdAsync(id);
 
         if (product == null)
-            return NotFound();
+            return NotFound(new { message = $"Product with ID {id} was not found." });
 
         return Ok(product);
     }
 
     // PUT/api/products/{id}
-    [HttpPut("{id}")]
+    [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateProductRequestDto dto)
     {
         try
         {
-            var updatedProduct = await _productService.UpdateAsync(dto, id);
-            return updatedProduct ? NoContent() : NotFound();
+            bool updatedProduct = await _productService.UpdateAsync(dto, id);
+
+            if (!updatedProduct)
+                return NotFound(new { message = $"Product with ID {id} was not found." });
+
+            return NoContent();
         }
         catch (ValidationException ex)
         {
             return Conflict(new { message = ex.Message });
         }
-        catch (DbUpdateException ex) when
-        (ex.InnerException is PostgresException postgres && postgres.SqlState
-        == PostgresErrorCodes.UniqueViolation && 
-        (postgres.ConstraintName == "product_sku"))
-        {
-            return Conflict( 
-                new { message = "A product with this sku already exists."});
-        }
     }
 
-    // DELETE/api/products/{id}
-    [HttpDelete]
-    public async Task<IActionResult> Delete(int id)
+    // PUT/api/products/{id}/isActive
+    [HttpPut("{id:int}/isActive")]
+    public async Task<IActionResult> Delete(int id, [FromBody] bool isActive)
     {
-        var isProduct = await _productService.DeleteAsync(id);
-        return isProduct ? NoContent() : NotFound();
+        var updatedProduct = 
+            await _productService.UpdateActiveStatusAsync(id, isActive);
+
+        if (updatedProduct == null)
+            return NotFound(new { message = $"Product with ID {id} was not found." });
+
+        return Ok(updatedProduct);
     }
 }

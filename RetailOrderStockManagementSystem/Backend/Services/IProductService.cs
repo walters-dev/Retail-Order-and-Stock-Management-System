@@ -1,4 +1,5 @@
 ﻿using RetailOrderStockManagementSystem.Backend.DTOs;
+using RetailOrderStockManagementSystem.Backend.Models;
 
 namespace RetailOrderStockManagementSystem.Backend.Services;
 
@@ -8,5 +9,5 @@ public interface IProductService
     Task<ProductResponseAdminDto?> GetByIdAsync(int id);
     Task<ProductResponseAdminDto> CreateAsync(CreateProductRequestDto dto);
     Task<bool> UpdateAsync(UpdateProductRequestDto dto, int id);
-    Task<bool> DeleteAsync(int id);
+    Task<Product?> UpdateActiveStatusAsync(int id, bool isActive);
 }
