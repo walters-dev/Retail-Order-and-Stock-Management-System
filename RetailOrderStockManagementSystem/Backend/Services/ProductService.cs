@@ -36,6 +36,8 @@ public class ProductService : IProductService
     // POST new product
     public async Task<ProductResponseAdminDto> CreateAsync(CreateProductRequestDto dto)
     {
+        // Normalize the SKU before checking uniqueness so casing/whitespace cannot
+        // accidentally create two products that should represent the same SKU.
         string sku = dto.SKU.Trim();
 
         //if (string.IsNullOrEmpty(sku)) // confirm if needed bcz dto has required check already, might dupicate that
@@ -61,6 +63,7 @@ public class ProductService : IProductService
         return MapToDto(createdProduct);
     }
 
+    // PUT 
     public async Task<bool> UpdateAsync(UpdateProductRequestDto dto, int id)
     {
         var product = await _repository.GetByIdAsync(id);
@@ -70,6 +73,8 @@ public class ProductService : IProductService
 
         string sku = dto.SKU.Trim();
 
+        // Exclude the current product; otherwise every update would conflict with
+        // its own existing SKU.
         if (await _repository.SkuExistsAsync(sku, id))
             throw new ArgumentException
                 ($"A product with this sku ({sku}) already exists.");
@@ -90,22 +95,20 @@ public class ProductService : IProductService
 
     public async Task<Product?> UpdateActiveStatusAsync(int id, bool isActive)
     {
-        // fetch the product from the database
+        // This is a soft delete/reactivation: the row remains available for old
+        // orders, but inactive products can be hidden from normal product lists.
         var product = await _retailDbContext.Products.FindAsync(id);
 
-        // return null if it doesn't exist (Controller will handle this as a 404)
+        // The controller converts null into a 404 response.
         if (product == null)
         {
             return null;
         }
 
-        // update the database isActive column
         product.IsActive = isActive;
 
-        // save the changes to the database
         await _retailDbContext.SaveChangesAsync();
 
-        // return the updated object
         return product;
     }
 

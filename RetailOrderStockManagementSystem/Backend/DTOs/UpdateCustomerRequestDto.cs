@@ -14,5 +14,7 @@ namespace RetailOrderStockManagementSystem.Backend.DTOs
         [EmailAddress(ErrorMessage = "Must be a valid email")]
         [StringLength(255, ErrorMessage = "Email cannot exceed 255 characters.")]
         public string? Email { get; set; }
+
+        public bool? LoyalCustomer { get; set; }
     }
 }

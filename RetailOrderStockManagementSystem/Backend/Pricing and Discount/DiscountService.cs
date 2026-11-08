@@ -1,45 +1,67 @@
-﻿using RetailOrderStockManagementSystem.Backend.DTOs;
+﻿using RetailOrderStockManagementSystem.Backend.Data;
+using RetailOrderStockManagementSystem.Backend.DTOs;
 using RetailOrderStockManagementSystem.Backend.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace RetailOrderStockManagementSystem.Backend.Services;
 
 public class DiscountService
 {
-    private const decimal LargeOrderDiscountPercentage = 0.10m; // get from DB
-    private const decimal FirstTimeCustomerDiscountPercentage = 0.15m; // get from DB
-    private const decimal LoyaltyDiscountPercentage = 0.05m; // get from DB
+    private readonly RetailDbContext _retailDbContext;
 
-    public DiscountResult CalculateDiscount(Customer customer, Order order,
+    public DiscountService(RetailDbContext retailDbContext)
+    {
+        _retailDbContext = retailDbContext;
+    }
+
+    public async Task<DiscountResult> CalculateDiscountAsync(Customer customer, Order order,
         decimal subtotal)
     {
+        // Percentages are converted from stored whole percentages (for example,
+        // 10 means 10%) to decimal rates (0.10) before calculating the amount.
         decimal highestPercentage = 0m;
         string discountName = "No discount";
+        var rules = await _retailDbContext.DiscountRules
+            .AsNoTracking()
+            .Where(rule => rule.IsActive)
+            .ToListAsync();
 
-        if (subtotal > 2000 &&
-            LargeOrderDiscountPercentage > highestPercentage)
+        // Rules are identified by their business names because each rule type has
+        // different eligibility conditions.
+        var largeOrderRule = rules.FirstOrDefault(rule =>
+            rule.Name == "Large Order Discount");
+        var firstTimeCustomerRule = rules.FirstOrDefault(rule =>
+            rule.Name == "First-Time Customer Discount");
+        var loyaltyRule = rules.FirstOrDefault(rule =>
+            rule.Name == "Loyal Customer Discount");
+
+        // Only the largest applicable discount is used; discounts are not stacked.
+        if (largeOrderRule is not null &&
+            subtotal >= largeOrderRule.MinimumOrderAmount &&
+            largeOrderRule.Percent / 100m > highestPercentage)
         {
-            highestPercentage = LargeOrderDiscountPercentage;
-            discountName = "Large Order Discount";
+            highestPercentage = largeOrderRule.Percent / 100m;
+            discountName = largeOrderRule.Name;
         }
 
-        if (customer.FirstTimeCustomer &&
-            FirstTimeCustomerDiscountPercentage > highestPercentage)
+        if (customer.FirstTimeCustomer && firstTimeCustomerRule is not null &&
+            firstTimeCustomerRule.Percent / 100m > highestPercentage)
         {
-            highestPercentage = FirstTimeCustomerDiscountPercentage;
-            discountName = "First-Time Customer Discount";
+            highestPercentage = firstTimeCustomerRule.Percent / 100m;
+            discountName = firstTimeCustomerRule.Name;
         }
 
-        if (customer.LoyalCustomer &&
-            LoyaltyDiscountPercentage > highestPercentage)
+        if (customer.LoyalCustomer && loyaltyRule is not null &&
+            loyaltyRule.Percent / 100m > highestPercentage)
         {
-            highestPercentage = LoyaltyDiscountPercentage;
-            discountName = "Loyal Customer Discount";
+            highestPercentage = loyaltyRule.Percent / 100m;
+            discountName = loyaltyRule.Name;
         }
 
         return new DiscountResult
         {
             DiscountName = discountName,
-            DiscountPercentage = highestPercentage,
+            DiscountPercent = highestPercentage,
             DiscountAmount = subtotal * highestPercentage
         };
     }

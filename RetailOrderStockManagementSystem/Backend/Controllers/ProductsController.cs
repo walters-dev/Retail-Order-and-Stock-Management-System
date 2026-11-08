@@ -28,7 +28,7 @@ public class ProductsController : ControllerBase
 
             return CreatedAtAction(nameof(GetById), new { id = createdProduct.ProductId }, createdProduct);
         }
-        catch (ValidationException ex)
+        catch (ArgumentException ex)
         {
             return Conflict(new { message = ex.Message });
         }         
@@ -67,7 +67,7 @@ public class ProductsController : ControllerBase
 
             return NoContent();
         }
-        catch (ValidationException ex)
+        catch (ArgumentException ex)
         {
             return Conflict(new { message = ex.Message });
         }

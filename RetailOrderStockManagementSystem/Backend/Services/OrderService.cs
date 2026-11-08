@@ -45,6 +45,8 @@ public class OrderService : IOrderService
 
     public async Task<OrderDetailDto> CreateAsync(CreateOrderRequestDto dto)
     {
+        // CalculateAsync performs all validation and creates line items before the
+        // order is persisted, so the saved order uses the quoted values.
         var (customer, lines, quote) = await CalculateAsync(dto);
 
         var order = new Order
@@ -54,7 +56,7 @@ public class OrderService : IOrderService
             CreatedAt = DateOnly.FromDateTime(DateTime.UtcNow),
             Status = OrderStatus.Status.Pending,
             Subtotal = quote.Subtotal,
-            //DiscountPercent = quote.DiscountPercent,
+            DiscountPercent = quote.DiscountPercent,
             DiscountAmount = quote.DiscountAmount,
             FinalTotal = quote.FinalTotal,
             OrderLineItems = lines
@@ -109,6 +111,8 @@ public class OrderService : IOrderService
             if (item.Quantity <= 0) 
                 throw new ValidationException("Order quantities must be positive whole numbers.");
 
+            // Combining duplicate product lines prevents the same product from
+            // being validated and priced separately more than once.
             requested[item.ProductId] = 
                 checked(requested.GetValueOrDefault(item.ProductId) + item.Quantity);
         }
@@ -132,6 +136,8 @@ public class OrderService : IOrderService
                 throw new ValidationException($"Insufficient stock for '{product.Name}'. " +
                     $"Available: {product.StockQuantity}; requested: {entry.Value}.");
 
+            // Store the price used at purchase time; later product price changes
+            // must not change the history of an existing order.
             var unitPrice = 
                 Math.Round(product.UnitPrice, 2, MidpointRounding.AwayFromZero);
 
@@ -150,8 +156,10 @@ public class OrderService : IOrderService
         decimal subtotal = 
             Math.Round(_pricing.CalculateSubtotal(lines), 2, MidpointRounding.AwayFromZero);
 
+        // Discount rules are evaluated against the subtotal, after all line
+        // quantities and prices have been validated.
         var discount = 
-            _discounts.CalculateDiscount(customer, new Order(), subtotal);
+            await _discounts.CalculateDiscountAsync(customer, new Order(), subtotal);
 
         decimal discountAmount = 
             Math.Round(discount.DiscountAmount, 2, MidpointRounding.AwayFromZero);
@@ -164,25 +172,25 @@ public class OrderService : IOrderService
             CustomerId = customer.CustomerId,
             Items = quoteLines,
             Subtotal = subtotal,
-            DiscountPercent = discount.DiscountPercentage * 100m,
+            DiscountPercent = discount.DiscountPercent * 100m,
             DiscountAmount = discountAmount,
             FinalTotal = finalTotal
         });
     }
 
 
-    private static OrderResponseAdminDto MapToDto(Order o) => new()
+    private static OrderResponseAdminDto MapToDto(Order order) => new()
     {
-        OrderId = o.OrderId,
-        CustomerId = o.CustomerId,
-        OrderDate = o.OrderDate,
-        Subtotal = o.Subtotal,
-        //DiscountPercent = order.DiscountPercent,
-        DiscountAmount = o.DiscountAmount,
-        FinalTotal = o.FinalTotal,
-        Status = o.Status,
-        CreatedAt = o.CreatedAt,
-        UpdatedAt = o.UpdatedAt
+        OrderId = order.OrderId,
+        CustomerId = order.CustomerId,
+        OrderDate = order.OrderDate,
+        Subtotal = order.Subtotal,
+        DiscountPercent = order.DiscountPercent,
+        DiscountAmount = order.DiscountAmount,
+        FinalTotal = order.FinalTotal,
+        Status = order.Status,
+        CreatedAt = order.CreatedAt,
+        UpdatedAt = order.UpdatedAt
     };
 
     private static OrderDetailDto MapToDetailDto(Order order) => new()
@@ -191,7 +199,7 @@ public class OrderService : IOrderService
         CustomerId = order.CustomerId,
         OrderDate = order.OrderDate,
         Subtotal = order.Subtotal,
-        //DiscountPercentage = order.DiscountPercentage,
+        DiscountPercent = order.DiscountPercent,
         DiscountAmount = order.DiscountAmount,
         FinalTotal = order.FinalTotal,
         Status = order.Status,
@@ -210,7 +218,7 @@ public class OrderService : IOrderService
             ProductId = line.ProductId,
             ProductName = line.Product?.Name ?? string.Empty,
             Quantity = line.Quantity,
-            //UnitPrice = line.UnitPrice,
+            UnitPrice = line.UnitPrice,
             LineTotal = line.LineTotal
         }).ToList()
     };

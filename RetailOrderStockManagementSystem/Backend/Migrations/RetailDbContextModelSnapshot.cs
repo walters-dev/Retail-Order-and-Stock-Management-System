@@ -18,7 +18,7 @@ namespace RetailOrderStockManagementSystem.Backend.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.13")
+                .HasAnnotation("ProductVersion", "10.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "public", "order_status", new[] { "cancelled", "completed", "confirmed", "pending" });
@@ -43,6 +43,12 @@ namespace RetailOrderStockManagementSystem.Backend.Migrations
                         .HasColumnType("text")
                         .HasColumnName("email");
 
+                    b.Property<bool>("FirstTimeCustomer")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("first_time_customer");
+
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasColumnType("text")
@@ -53,6 +59,12 @@ namespace RetailOrderStockManagementSystem.Backend.Migrations
                         .HasColumnType("boolean")
                         .HasDefaultValue(true)
                         .HasColumnName("is_active");
+
+                    b.Property<bool>("LoyalCustomer")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("loyal_customer");
 
                     b.Property<string>("MobileNumber")
                         .IsRequired()
@@ -236,6 +248,11 @@ namespace RetailOrderStockManagementSystem.Backend.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("quantity");
 
+                    b.Property<decimal>("UnitPrice")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("numeric(12,2)")
+                        .HasColumnName("unit_price");
+
                     b.HasKey("OrderLineItemId")
                         .HasName("order_line_items_pkey");
 
@@ -364,7 +381,7 @@ namespace RetailOrderStockManagementSystem.Backend.Migrations
 
             modelBuilder.Entity("RetailOrderStockManagementSystem.Backend.Models.Order", b =>
                 {
-                    b.HasOne("RetailOrderStockManagementSystem.Backend.Models.Customer", null)
+                    b.HasOne("RetailOrderStockManagementSystem.Backend.Models.Customer", "Customer")
                         .WithMany()
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -376,23 +393,34 @@ namespace RetailOrderStockManagementSystem.Backend.Migrations
                         .HasForeignKey("DiscountRuleId")
                         .OnDelete(DeleteBehavior.SetNull)
                         .HasConstraintName("fk_orders_discount_rule");
+
+                    b.Navigation("Customer");
                 });
 
             modelBuilder.Entity("RetailOrderStockManagementSystem.Backend.Models.OrderLineItem", b =>
                 {
-                    b.HasOne("RetailOrderStockManagementSystem.Backend.Models.Order", null)
-                        .WithMany()
+                    b.HasOne("RetailOrderStockManagementSystem.Backend.Models.Order", "Order")
+                        .WithMany("OrderLineItems")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_line_items_order");
 
-                    b.HasOne("RetailOrderStockManagementSystem.Backend.Models.Product", null)
+                    b.HasOne("RetailOrderStockManagementSystem.Backend.Models.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_line_items_product");
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("RetailOrderStockManagementSystem.Backend.Models.Order", b =>
+                {
+                    b.Navigation("OrderLineItems");
                 });
 #pragma warning restore 612, 618
         }

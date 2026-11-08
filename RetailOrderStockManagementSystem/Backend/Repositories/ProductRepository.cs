@@ -14,12 +14,13 @@ public class ProductRepository : IProductRepository
         _retailDbContext = retailDbContext;
     }
 
-    // GET all products (active)
-    public async Task<List<Product>> GetAllAsync(ProductQueryParameters? parameters = null)
+    // GET all products (active/inactive)
+    public async Task<List<Product>> GetAllAsync(ProductQueryParameters parameters)
     {
         var query = _retailDbContext.Products.AsQueryable();
 
-        // 1. Filter: which products?
+        // Build the query first and execute it only at ToListAsync. This lets
+        // EF Core translate filtering, sorting, and paging into one SQL query.
         if (!parameters.IncludeInactive)
             query = query.Where(p => p.IsActive);
 
@@ -29,7 +30,6 @@ public class ProductRepository : IProductRepository
             query = query.Where(p => p.Name.ToLower().Contains(search));
         }
 
-        // 2. Sort: in what order?
         query = parameters.SortBy?.ToLower() switch
         {
             "price" => parameters.Descending ? query.OrderByDescending(p => p.UnitPrice) :
@@ -39,7 +39,7 @@ public class ProductRepository : IProductRepository
             _ => query.OrderBy(p => p.ProductId)
         };
 
-        // 3. Page: which slice?
+        // Skip/Take returns one page instead of loading every product into memory.
         query = query.Skip((parameters.Page - 1) * parameters.PageSize)
             .Take(parameters.PageSize);
 
@@ -108,10 +108,11 @@ public class ProductRepository : IProductRepository
     {
         var query = _retailDbContext.Products.Where(product => product.SKU == sku);
 
+        // During an update, ignore the row being edited when checking uniqueness.
         if (excludedProductId.HasValue)
         {
             int productId = excludedProductId.Value;
-            query = query.Where(product => product.SKU != sku);
+            query = query.Where(product => product.ProductId != productId);
         }
 
         return await query.AnyAsync();
