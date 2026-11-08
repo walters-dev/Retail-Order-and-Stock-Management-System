@@ -276,6 +276,10 @@ namespace RetailOrderStockManagementSystem.Backend.Data
                     table.HasCheckConstraint(
                         "chk_line_item_quantity",
                         "quantity > 0");
+
+                    table.HasCheckConstraint(
+                        "chk_product_price",
+                        "unit_price > 0");
                 });
 
                 entity.HasKey(x => x.OrderLineItemId)
