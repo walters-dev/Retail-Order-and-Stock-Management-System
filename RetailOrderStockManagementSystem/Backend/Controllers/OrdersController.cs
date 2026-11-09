@@ -1,10 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Npgsql;
 using RetailOrderStockManagementSystem.Backend.DTOs;
 using RetailOrderStockManagementSystem.Backend.Enums;
 using RetailOrderStockManagementSystem.Backend.Services;
-using System.ComponentModel.DataAnnotations;
 
 namespace RetailOrderStockManagementSystem.Backend.Controllers;
 

@@ -63,8 +63,29 @@ public class OrderService : IOrderService
         };
 
         await _orders.AddAsync(order);
-        return await GetByIdAsync(order.OrderId) ??
-            throw new InvalidOperationException("The saved order could not be read.");
+
+        // The order and its line items have already been saved. Build the response
+        // from the saved entities and quote data instead of querying the database
+        // again; a failed reload must not make a successful POST look unsuccessful.
+        order.Customer = customer;
+
+        var productNames = quote.Items.ToDictionary(
+            item => item.ProductId,
+            item => item.ProductName);
+
+        foreach (var line in order.OrderLineItems)
+        {
+            if (productNames.TryGetValue(line.ProductId, out var productName))
+            {
+                line.Product = new Product
+                {
+                    ProductId = line.ProductId,
+                    Name = productName
+                };
+            }
+        }
+
+        return MapToDetailDto(order);
     }
 
     public Task<bool> ConfirmAsync(int id, CancellationToken cancellationToken = default)

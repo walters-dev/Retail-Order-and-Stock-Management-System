@@ -43,12 +43,6 @@ namespace RetailOrderStockManagementSystem.Backend.Migrations
                         .HasColumnType("text")
                         .HasColumnName("email");
 
-                    b.Property<bool>("FirstTimeCustomer")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false)
-                        .HasColumnName("first_time_customer");
-
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasColumnType("text")
@@ -59,12 +53,6 @@ namespace RetailOrderStockManagementSystem.Backend.Migrations
                         .HasColumnType("boolean")
                         .HasDefaultValue(true)
                         .HasColumnName("is_active");
-
-                    b.Property<bool>("LoyalCustomer")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false)
-                        .HasColumnName("loyal_customer");
 
                     b.Property<string>("MobileNumber")
                         .IsRequired()
@@ -247,11 +235,6 @@ namespace RetailOrderStockManagementSystem.Backend.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("integer")
                         .HasColumnName("quantity");
-
-                    b.Property<decimal>("UnitPrice")
-                        .HasPrecision(12, 2)
-                        .HasColumnType("numeric(12,2)")
-                        .HasColumnName("unit_price");
 
                     b.HasKey("OrderLineItemId")
                         .HasName("order_line_items_pkey");

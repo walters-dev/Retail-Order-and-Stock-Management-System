@@ -1,5 +1,4 @@
-﻿using k8s.KubeConfigModels;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using RetailOrderStockManagementSystem.Backend.Data;
 using RetailOrderStockManagementSystem.Backend.Enums;
 using RetailOrderStockManagementSystem.Backend.Models;
