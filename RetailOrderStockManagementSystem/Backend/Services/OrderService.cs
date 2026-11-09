@@ -3,6 +3,7 @@ using RetailOrderStockManagementSystem.Backend.DTOs;
 using RetailOrderStockManagementSystem.Backend.Enums;
 using RetailOrderStockManagementSystem.Backend.Models;
 using RetailOrderStockManagementSystem.Backend.Repositories;
+using RetailOrderStockManagementSystem.Backend.Pricing_and_Discount;
 using System.ComponentModel.DataAnnotations;
 
 namespace RetailOrderStockManagementSystem.Backend.Services;

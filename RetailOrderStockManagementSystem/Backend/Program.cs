@@ -10,6 +10,7 @@ using RetailOrderStockManagementSystem.Backend.Middleware;
 using RetailOrderStockManagementSystem.Backend.Repositories;
 using RetailOrderStockManagementSystem.Backend.Security;
 using RetailOrderStockManagementSystem.Backend.Services;
+using RetailOrderStockManagementSystem.Backend.Pricing_and_Discount;
 //using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore;
 using System.Text;
