@@ -14,6 +14,7 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
 
+
 // Read the connection string saved in User Secrets.
 var connectionString =
     builder.Configuration.GetConnectionString("DefaultConnection")
