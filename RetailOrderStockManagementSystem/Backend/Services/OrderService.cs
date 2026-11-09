@@ -57,6 +57,7 @@ public class OrderService : IOrderService
             CreatedAt = DateOnly.FromDateTime(DateTime.UtcNow),
             Status = OrderStatus.Status.Pending,
             Subtotal = quote.Subtotal,
+            DiscountRuleId = quote.DiscountRuleId,
             DiscountPercent = quote.DiscountPercent,
             DiscountAmount = quote.DiscountAmount,
             FinalTotal = quote.FinalTotal,

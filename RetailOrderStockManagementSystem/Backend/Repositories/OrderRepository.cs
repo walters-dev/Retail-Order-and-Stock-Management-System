@@ -52,7 +52,11 @@ public class OrderRepository : IOrderRepository
         var order = await _retailDbContext.Orders.AsNoTracking().Include(o => o.OrderLineItems)
             .SingleOrDefaultAsync(o => o.OrderId == id, cancellationToken);
 
-        if (order == null || order.Status != OrderStatus.Status.Pending)
+        // Confirmation is the final integrity check before stock is changed.
+        // Reject malformed orders even if they did not come through the API.
+        if (order == null || order.Status != OrderStatus.Status.Pending ||
+            order.OrderLineItems.Count == 0 ||
+            order.OrderLineItems.Any(item => item.Quantity <= 0))
             return false;
 
         foreach (var line in order.OrderLineItems.GroupBy(item => item.ProductId)
