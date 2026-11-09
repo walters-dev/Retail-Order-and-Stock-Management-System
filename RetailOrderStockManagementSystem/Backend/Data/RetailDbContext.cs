@@ -65,6 +65,14 @@ namespace RetailOrderStockManagementSystem.Backend.Data
                 entity.HasIndex(x => x.Email)
                     .IsUnique()
                     .HasDatabaseName("customers_email_key");
+
+                entity.Property(x => x.FirstTimeCustomer)
+                    .HasColumnName("first_time_customer_discount")
+                    .HasDefaultValue(true);
+
+                entity.Property(x => x.LoyaltyCustomer)
+                    .HasColumnName("loyalty_customer_discount")
+                    .HasDefaultValue(false);
             });
 
             // PRODUCTS
@@ -181,13 +189,13 @@ namespace RetailOrderStockManagementSystem.Backend.Data
                         "chk_order_final_total",
                         "final_total >= 0");
                 });
-
                 entity.HasKey(x => x.OrderId)
                     .HasName("orders_pkey");
 
                 entity.Property(x => x.OrderId)
-                    .HasColumnName("order_id")
-                    .UseIdentityByDefaultColumn();
+                     .HasColumnName("order_id")
+                     .HasDefaultValueSql("gen_random_uuid()");
+
 
                 entity.Property(x => x.CustomerId)
                     .HasColumnName("customer_id");
@@ -205,6 +213,11 @@ namespace RetailOrderStockManagementSystem.Backend.Data
                     .HasColumnName("discount_amount")
                     .HasPrecision(12, 2)
                     .HasDefaultValue(0m);
+
+                //entity.Property(x => x.DiscountPercentage)
+                //    .HasColumnName("discount_percentage")
+                //    .HasPrecision(5, 2)
+                //    .HasDefaultValue(0m);
 
                 entity.Property(x => x.FinalTotal)
                     .HasColumnName("final_total")
@@ -302,6 +315,9 @@ namespace RetailOrderStockManagementSystem.Backend.Data
 
                 entity.HasIndex(x => x.ProductId)
                     .HasDatabaseName("ix_line_items_product_id");
+                entity.Property(x => x.UnitPrice)
+                    .HasColumnName("unit_price")
+                    .HasPrecision(12, 2);
             });
 
             // USERS
