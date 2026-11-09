@@ -82,7 +82,7 @@ namespace RetailOrderStockManagementSystem.Backend.Data
                 {
                     table.HasCheckConstraint(
                         "chk_product_price",
-                        "unit_price >= 0");
+                        "unit_price > 0");
 
                     table.HasCheckConstraint(
                         "chk_stock_quantity",

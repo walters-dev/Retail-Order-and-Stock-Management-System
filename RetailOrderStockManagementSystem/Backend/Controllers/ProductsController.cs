@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using RetailOrderStockManagementSystem.Backend.DTOs;
@@ -9,6 +10,7 @@ namespace RetailOrderStockManagementSystem.Backend.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class ProductsController : ControllerBase
 {
     private readonly IProductService _productService;
@@ -20,6 +22,7 @@ public class ProductsController : ControllerBase
 
     // POST/api/products
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create([FromBody] CreateProductRequestDto dto)
     {
         try
@@ -36,17 +39,33 @@ public class ProductsController : ControllerBase
 
     // GET/api/products
     [HttpGet]
+    [Authorize(Roles = "Admin, Staff")]
     public async Task<IActionResult> GetAll([FromQuery] ProductQueryParameters parameters)
     {
-        var products = await _productService.GetAllAsync(parameters);
-        return Ok(products);
+        if (User.IsInRole("Admin"))
+            return Ok(await _productService.GetAllAsync(parameters));
+
+        // Staff can view sellable products only and cannot request inactive records.
+        parameters.IncludeInactive = false;
+        return Ok(await _productService.GetAllForStaffAsync(parameters));
     }
 
     // GET/api/products/{id}
     [HttpGet("{id:int}")]
+    [Authorize(Roles = "Admin, Staff")]
     public async Task<IActionResult> GetById(int id)
     {
-        var product = await _productService.GetByIdAsync(id);
+        if (User.IsInRole("Admin"))
+        {
+            var adminProduct = await _productService.GetByIdAsync(id);
+
+            if (adminProduct == null)
+                return NotFound(new { message = $"Product with ID {id} was not found." });
+
+            return Ok(adminProduct);
+        }
+
+        var product = await _productService.GetByIdForStaffAsync(id);
 
         if (product == null)
             return NotFound(new { message = $"Product with ID {id} was not found." });
@@ -56,6 +75,7 @@ public class ProductsController : ControllerBase
 
     // PUT/api/products/{id}
     [HttpPut("{id:int}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateProductRequestDto dto)
     {
         try
@@ -75,6 +95,7 @@ public class ProductsController : ControllerBase
 
     // PUT/api/products/{id}/isActive
     [HttpPut("{id:int}/isActive")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(int id, [FromBody] bool isActive)
     {
         var updatedProduct = 

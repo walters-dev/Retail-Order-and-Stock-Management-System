@@ -3,7 +3,7 @@ using RetailOrderStockManagementSystem.Backend.DTOs;
 using RetailOrderStockManagementSystem.Backend.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace RetailOrderStockManagementSystem.Backend.Services;
+namespace RetailOrderStockManagementSystem.Backend.Pricing_and_Discount;
 
 public class DiscountService
 {

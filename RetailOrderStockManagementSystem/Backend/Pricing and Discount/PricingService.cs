@@ -1,9 +1,7 @@
 ﻿using RetailOrderStockManagementSystem.Backend.Models;
 using RetailOrderStockManagementSystem.Backend.DTOs;
-using RetailOrderStockManagementSystem.Backend.Pricing_and_Discount;
-using System.Linq;
 
-namespace RetailOrderStockManagementSystem.Backend.Services;
+namespace RetailOrderStockManagementSystem.Backend.Pricing_and_Discount;
 
 public class PricingService
 {

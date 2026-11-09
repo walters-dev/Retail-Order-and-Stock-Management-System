@@ -25,12 +25,26 @@ public class ProductService : IProductService
         return products.Select(MapToDto).ToList();
     }
 
+    public async Task<List<ProductResponseStaffDto>> GetAllForStaffAsync(ProductQueryParameters parameters)
+    {
+        var products = await _repository.GetAllAsync(parameters);
+
+        return products.Select(MapToStaffDto).ToList();
+    }
+
     // GET product ById, returns null if product is not found
     public async Task<ProductResponseAdminDto?> GetByIdAsync(int id)
     {
         var product = await _repository.GetByIdAsync(id);
 
         return product == null ? null : MapToDto(product);
+    }
+
+    public async Task<ProductResponseStaffDto?> GetByIdForStaffAsync(int id)
+    {
+        var product = await _repository.GetByIdAsync(id);
+
+        return product == null || !product.IsActive ? null : MapToStaffDto(product);
     }
 
     // POST new product
@@ -106,6 +120,7 @@ public class ProductService : IProductService
         }
 
         product.IsActive = isActive;
+        product.UpdatedAt = DateOnly.FromDateTime(DateTime.UtcNow);
 
         await _retailDbContext.SaveChangesAsync();
 
@@ -123,5 +138,14 @@ public class ProductService : IProductService
         IsActive = p.IsActive,
         CreatedAt = p.CreatedAt,
         UpdatedAt = p.UpdatedAt
+    };
+
+    private static ProductResponseStaffDto MapToStaffDto(Product p) => new()
+    {
+        SKU = p.SKU,
+        Name = p.Name,
+        Category = p.Category,
+        UnitPrice = p.UnitPrice,
+        StockQuantity = p.StockQuantity
     };
 }
