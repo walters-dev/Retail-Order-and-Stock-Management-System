@@ -18,7 +18,7 @@ namespace RetailOrderStockManagementSystem.Backend.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.13")
+                .HasAnnotation("ProductVersion", "10.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "public", "order_status", new[] { "cancelled", "completed", "confirmed", "pending" });
@@ -43,6 +43,12 @@ namespace RetailOrderStockManagementSystem.Backend.Migrations
                         .HasColumnType("text")
                         .HasColumnName("email");
 
+                    b.Property<bool>("FirstTimeCustomer")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("first_time_customer_discount");
+
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasColumnType("text")
@@ -53,6 +59,12 @@ namespace RetailOrderStockManagementSystem.Backend.Migrations
                         .HasColumnType("boolean")
                         .HasDefaultValue(true)
                         .HasColumnName("is_active");
+
+                    b.Property<bool>("LoyaltyCustomer")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("loyalty_customer_discount");
 
                     b.Property<string>("MobileNumber")
                         .IsRequired()
@@ -122,12 +134,11 @@ namespace RetailOrderStockManagementSystem.Backend.Migrations
 
             modelBuilder.Entity("RetailOrderStockManagementSystem.Backend.Models.Order", b =>
                 {
-                    b.Property<int>("OrderId")
+                    b.Property<Guid>("OrderId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("order_id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("OrderId"));
+                        .HasColumnType("uuid")
+                        .HasColumnName("order_id")
+                        .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<DateOnly>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -224,8 +235,8 @@ namespace RetailOrderStockManagementSystem.Backend.Migrations
                         .HasColumnType("numeric(12,2)")
                         .HasColumnName("line_total");
 
-                    b.Property<int>("OrderId")
-                        .HasColumnType("integer")
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uuid")
                         .HasColumnName("order_id");
 
                     b.Property<int>("ProductId")
@@ -235,6 +246,11 @@ namespace RetailOrderStockManagementSystem.Backend.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("integer")
                         .HasColumnName("quantity");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("numeric(12,2)")
+                        .HasColumnName("unit_price");
 
                     b.HasKey("OrderLineItemId")
                         .HasName("order_line_items_pkey");
