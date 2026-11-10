@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using RetailOrderStockManagementSystem.Backend.Enums;
+using System.ComponentModel.DataAnnotations;
 namespace RetailOrderStockManagementSystem.Backend.DTOs
 {
     public class CreateUserRequestDto
@@ -13,5 +14,8 @@ namespace RetailOrderStockManagementSystem.Backend.DTOs
         [Required(ErrorMessage = "Password is required.")]
         [StringLength(30, ErrorMessage = "Password cannot exceed 30 characters.")]
         public string Password { get; set; } = "";
+        [Required]
+        public Users.UserTypes Type {  get; set; }
     }
 }
+            
