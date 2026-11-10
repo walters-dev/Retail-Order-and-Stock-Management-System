@@ -1,80 +1,59 @@
-﻿using RetailOrderStockManagementSystem.Backend.Data;
-using RetailOrderStockManagementSystem.Backend.DTOs;
 using RetailOrderStockManagementSystem.Backend.Models;
-using Microsoft.EntityFrameworkCore;
+using RetailOrderStockManagementSystem.Backend.Repositories;
 
 namespace RetailOrderStockManagementSystem.Backend.Pricing_and_Discount;
 
-public class DiscountService
+/// Selects the single discount rule applicable to an order.
+public sealed class DiscountService
 {
-    // This ID is seeded in Supabase and identifies the business rule rather than
-    // relying on a display name that could be changed by an administrator.
     private const int LargeOrderDiscountRuleId = 1;
     private const int FirstTimeCustomerDiscountRuleId = 2;
     private const int LoyaltyDiscountRuleId = 3;
 
-    private readonly RetailDbContext _retailDbContext;
+    private readonly IDiscountRuleRepository _discountRuleRepository;
 
-    public DiscountService(RetailDbContext retailDbContext)
+    public DiscountService(IDiscountRuleRepository discountRuleRepository)
     {
-        _retailDbContext = retailDbContext;
+        _discountRuleRepository = discountRuleRepository;
     }
 
-    public async Task<DiscountResult> CalculateDiscountAsync(Customer customer, Order order,
+    // Returns the highest eligible active discount rule, or null when no rule applies.
+    // Discounts do not stack.
+    public async Task<DiscountRule?> SelectDiscountRuleAsync(
+        Customer customer,
+        decimal subtotal,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(customer);
+
+        if (subtotal < 0m)
+            throw new ArgumentOutOfRangeException(
+                nameof(subtotal), subtotal, "Subtotal cannot be negative.");
+
+        var activeRules = await _discountRuleRepository
+            .GetActiveRulesAsync(cancellationToken);
+
+        return activeRules
+            .Where(rule => IsEligible(rule, customer, subtotal))
+            .OrderByDescending(rule => rule.Percent)
+            .ThenBy(rule => rule.DiscountRuleId)
+            .FirstOrDefault();
+    }
+
+    private static bool IsEligible(
+        DiscountRule rule,
+        Customer customer,
         decimal subtotal)
     {
-        // Percentages are converted from stored whole percentages (for example,
-        // 10 means 10%) to decimal rates (0.10) before calculating the amount.
-        var rules = await _retailDbContext.DiscountRules
-            .AsNoTracking()
-            .Where(rule => rule.IsActive &&
-                (rule.DiscountRuleId == LargeOrderDiscountRuleId ||
-                 rule.DiscountRuleId == FirstTimeCustomerDiscountRuleId ||
-                 rule.DiscountRuleId == LoyaltyDiscountRuleId))
-            .ToListAsync();
-
-        var largeOrderRule = rules.SingleOrDefault(rule =>
-            rule.DiscountRuleId == LargeOrderDiscountRuleId);
-        var firstTimeCustomerRule = rules.SingleOrDefault(rule =>
-            rule.DiscountRuleId == FirstTimeCustomerDiscountRuleId);
-        var loyaltyRule = rules.SingleOrDefault(rule =>
-            rule.DiscountRuleId == LoyaltyDiscountRuleId);
-
-        decimal highestPercentage = 0m;
-        int? discountRuleId = null;
-        string discountName = "No discount";
-
-        // The rule identity is fixed by DiscountRuleId instead of its mutable name.
-        if (largeOrderRule is not null &&
-            subtotal >= largeOrderRule.MinimumOrderAmount)
+        return rule.DiscountRuleId switch
         {
-            highestPercentage = largeOrderRule.Percent / 100m;
-            discountRuleId = largeOrderRule.DiscountRuleId;
-            discountName = largeOrderRule.Name;
-        }
-
-        if (customer.FirstTimeCustomer && firstTimeCustomerRule is not null &&
-            firstTimeCustomerRule.Percent / 100m > highestPercentage)
-        {
-            highestPercentage = firstTimeCustomerRule.Percent / 100m;
-            discountRuleId = firstTimeCustomerRule.DiscountRuleId;
-            discountName = firstTimeCustomerRule.Name;
-        }
-
-        if (customer.LoyalCustomer && loyaltyRule is not null &&
-            loyaltyRule.Percent / 100m > highestPercentage)
-        {
-            highestPercentage = loyaltyRule.Percent / 100m;
-            discountRuleId = loyaltyRule.DiscountRuleId;
-            discountName = loyaltyRule.Name;
-        }
-
-        return new DiscountResult
-        {
-            DiscountRuleId = discountRuleId,
-            DiscountName = discountName,
-            DiscountPercent = highestPercentage,
-            DiscountAmount = subtotal * highestPercentage
+            LargeOrderDiscountRuleId =>
+                subtotal >= rule.MinimumOrderAmount,
+            FirstTimeCustomerDiscountRuleId =>
+                customer.FirstTimeCustomer,
+            LoyaltyDiscountRuleId =>
+                customer.LoyalCustomer,
+            _ => false
         };
     }
 }

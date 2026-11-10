@@ -209,11 +209,6 @@ namespace RetailOrderStockManagementSystem.Backend.Data
                     .HasPrecision(12, 2)
                     .HasDefaultValue(0m);
 
-                entity.Property(x => x.DiscountPercent)
-                    .HasColumnName("discount_percent")
-                    .HasPrecision(5, 2)
-                    .HasDefaultValue(0m);
-
                 entity.Property(x => x.DiscountAmount)
                     .HasColumnName("discount_amount")
                     .HasPrecision(12, 2)
@@ -244,11 +239,11 @@ namespace RetailOrderStockManagementSystem.Backend.Data
                     .OnDelete(DeleteBehavior.Restrict)
                     .HasConstraintName("fk_orders_customer");
 
-                entity.HasOne<DiscountRule>()
+                entity.HasOne(order => order.DiscountRule)
                     .WithMany()
-                    .HasForeignKey(x => x.DiscountRuleId)
-                    .OnDelete(DeleteBehavior.SetNull)
-                    .HasConstraintName("fk_orders_discount_rule");
+                    .HasForeignKey(order => order.DiscountRuleId)
+                    .HasConstraintName("fk_orders_discount_rule")
+                    .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasIndex(x => x.CustomerId)
                     .HasDatabaseName("ix_orders_customer_id");

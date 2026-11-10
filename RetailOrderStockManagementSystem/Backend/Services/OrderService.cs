@@ -13,17 +13,15 @@ public class OrderService : IOrderService
     private readonly IOrderRepository _orders;
     private readonly ICustomerRepository _customers;
     private readonly IProductRepository _products;
-    private readonly PricingService _pricing;
-    private readonly DiscountService _discounts;
+    private readonly IPricingService _pricing;
 
     public OrderService(IOrderRepository orders, ICustomerRepository customers,
-        IProductRepository products, PricingService pricing, DiscountService discounts)
+        IProductRepository products, IPricingService pricing)
     {
         _orders = orders;
         _customers = customers;
         _products = products;
         _pricing = pricing;
-        _discounts = discounts;
     }
 
     public async Task<List<OrderResponseAdminDto>> GetAllAsync(OrderStatus.Status? status = null)
@@ -46,8 +44,6 @@ public class OrderService : IOrderService
 
     public async Task<OrderDetailDto> CreateAsync(CreateOrderRequestDto dto)
     {
-        // CalculateAsync performs all validation and creates line items before the
-        // order is persisted, so the saved order uses the quoted values.
         var (customer, lines, quote) = await CalculateAsync(dto);
 
         var order = new Order
@@ -58,7 +54,6 @@ public class OrderService : IOrderService
             Status = OrderStatus.Status.Pending,
             Subtotal = quote.Subtotal,
             DiscountRuleId = quote.DiscountRuleId,
-            DiscountPercent = quote.DiscountPercent,
             DiscountAmount = quote.DiscountAmount,
             FinalTotal = quote.FinalTotal,
             OrderLineItems = lines
@@ -70,6 +65,13 @@ public class OrderService : IOrderService
         // from the saved entities and quote data instead of querying the database
         // again; a failed reload must not make a successful POST look unsuccessful.
         order.Customer = customer;
+        order.DiscountRule = quote.DiscountRuleId.HasValue
+            ? new DiscountRule
+            {
+                DiscountRuleId = quote.DiscountRuleId.Value,
+                Percent = quote.DiscountPercent
+            }
+            : null;
 
         var productNames = quote.Items.ToDictionary(
             item => item.ProductId,
@@ -141,7 +143,6 @@ public class OrderService : IOrderService
         }
 
         var lines = new List<OrderLineItem>();
-
         var quoteLines = new List<OrderLineQuoteDto>();
 
         foreach (var entry in requested)
@@ -149,23 +150,22 @@ public class OrderService : IOrderService
             var product = await _products.GetByIdAsync(entry.Key);
 
             if (product == null || !product.IsActive) 
-                throw new KeyNotFoundException($"Product {entry.Key} does not exist or is inactive.");
+                throw new KeyNotFoundException(
+                    $"Product {entry.Key} does not exist or is inactive.");
 
             if (product.UnitPrice <= 0m) 
-                throw new ValidationException($"Product '{product.Name}' " +
-                    $"must have a price greater than zero before it can be ordered.");
+                throw new ValidationException(
+                    $"Product '{product.Name}' must have a price greater than zero before it can be ordered.");
 
             if (entry.Value > product.StockQuantity)
-                throw new ValidationException($"Insufficient stock for '{product.Name}'. " +
+                throw new ValidationException(
+                    $"Insufficient stock for '{product.Name}'. " +
                     $"Available: {product.StockQuantity}; requested: {entry.Value}.");
 
-            // Store the price used at purchase time; later product price changes
-            // must not change the history of an existing order.
-            var unitPrice = 
-                Math.Round(product.UnitPrice, 2, MidpointRounding.AwayFromZero);
+            var unitPrice = Math.Round(
+                product.UnitPrice, 2, MidpointRounding.AwayFromZero);
 
-            var lineTotal = 
-                Math.Round(_pricing.CalculateLineTotal(entry.Value, unitPrice), 2, MidpointRounding.AwayFromZero);
+            var lineTotal = _pricing.CalculateLineTotal(entry.Value, unitPrice);
 
             lines.Add(new OrderLineItem 
             { ProductId = product.ProductId, Quantity = entry.Value, 
@@ -176,31 +176,21 @@ public class OrderService : IOrderService
                 Quantity = entry.Value, UnitPrice = unitPrice, LineTotal = lineTotal });
         }
 
-        decimal subtotal = 
-            Math.Round(_pricing.CalculateSubtotal(lines), 2, MidpointRounding.AwayFromZero);
-
-        // Discount rules are evaluated against the subtotal, after all line
-        // quantities and prices have been validated.
-        var discount = 
-            await _discounts.CalculateDiscountAsync(customer, new Order(), subtotal);
-
-        decimal discountAmount = 
-            Math.Round(discount.DiscountAmount, 2, MidpointRounding.AwayFromZero);
-
-        decimal finalTotal = 
-            Math.Max(0m, Math.Round(_pricing.CalculateFinalTotal(subtotal, discountAmount), 2, MidpointRounding.AwayFromZero));
+        var pricing = await _pricing.CalculateOrderTotalsAsync(
+            customer,
+            lines.Select(line => (line.Quantity, line.UnitPrice)));
 
         return (customer, lines, new OrderQuoteDto
         {
             CustomerId = customer.CustomerId,
             Items = quoteLines,
-            Subtotal = subtotal,
-            DiscountPercent = discount.DiscountPercent * 100m,
-            DiscountAmount = discountAmount,
-            FinalTotal = finalTotal
+            DiscountRuleId = pricing.DiscountRuleId,
+            Subtotal = pricing.Subtotal,
+            DiscountPercent = pricing.DiscountPercent,
+            DiscountAmount = pricing.DiscountAmount,
+            FinalTotal = pricing.FinalTotal
         });
     }
-
 
     private static OrderResponseAdminDto MapToDto(Order order) => new()
     {
@@ -208,7 +198,8 @@ public class OrderService : IOrderService
         CustomerId = order.CustomerId,
         OrderDate = order.OrderDate,
         Subtotal = order.Subtotal,
-        DiscountPercent = order.DiscountPercent,
+        DiscountRuleId = order.DiscountRuleId,
+        DiscountPercent = order.DiscountRule?.Percent ?? 0m,
         DiscountAmount = order.DiscountAmount,
         FinalTotal = order.FinalTotal,
         Status = order.Status,
@@ -222,7 +213,8 @@ public class OrderService : IOrderService
         CustomerId = order.CustomerId,
         OrderDate = order.OrderDate,
         Subtotal = order.Subtotal,
-        DiscountPercent = order.DiscountPercent,
+        DiscountRuleId = order.DiscountRuleId,
+        DiscountPercent = order.DiscountRule?.Percent ?? 0m,
         DiscountAmount = order.DiscountAmount,
         FinalTotal = order.FinalTotal,
         Status = order.Status,

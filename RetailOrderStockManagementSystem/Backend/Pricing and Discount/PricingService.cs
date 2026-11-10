@@ -1,9 +1,9 @@
 ﻿using RetailOrderStockManagementSystem.Backend.Models;
-using RetailOrderStockManagementSystem.Backend.DTOs;
+using System.ComponentModel.DataAnnotations;
 
 namespace RetailOrderStockManagementSystem.Backend.Pricing_and_Discount;
 
-public class PricingService
+public sealed class PricingService : IPricingService
 {
     private readonly DiscountService _discountService;
 
@@ -14,76 +14,50 @@ public class PricingService
 
     public decimal CalculateLineTotal(int quantity, decimal unitPrice)
     {
-        // Line totals are calculated from the captured unit price, not the current
-        // product record, so an order remains financially reproducible.
-        return quantity * unitPrice;
+        if (quantity <= 0)
+            throw new ValidationException("Order quantities must be positive whole numbers.");
+
+        if (unitPrice <= 0m)
+            throw new ValidationException("Unit price must be greater than zero.");
+
+        return RoundCurrency(quantity * unitPrice);
     }
 
-    public decimal CalculateSubtotal(List<OrderLineItem> items)
+    public async Task<OrderPricingResult> CalculateOrderTotalsAsync(
+        Customer customer,
+        IEnumerable<(int Quantity, decimal UnitPrice)> lineItems)
     {
-        // The subtotal is the total before discounts or other order-level changes.
-        return items.Sum(item => item.LineTotal);
+        ArgumentNullException.ThrowIfNull(customer);
+        ArgumentNullException.ThrowIfNull(lineItems);
+
+        var items = lineItems.ToList();
+        if (items.Count == 0)
+            throw new ValidationException("An order must contain at least one line item.");
+
+        var subtotal = RoundCurrency(items.Sum(item =>
+            CalculateLineTotal(item.Quantity, item.UnitPrice)));
+
+        var discountRule = await _discountService.SelectDiscountRuleAsync(
+            customer, subtotal);
+
+        var discountPercent = discountRule?.Percent ?? 0m;
+        var discountAmount = RoundCurrency(
+            subtotal * (discountPercent / 100m));
+        var finalTotal = Math.Max(0m,
+            RoundCurrency(subtotal - discountAmount));
+
+        return new OrderPricingResult
+        {
+            Subtotal = subtotal,
+            DiscountPercent = discountPercent,
+            DiscountAmount = discountAmount,
+            FinalTotal = finalTotal,
+            DiscountRuleId = discountRule?.DiscountRuleId
+        };
     }
 
-    public async Task<decimal> GetDiscountPercentageAsync(Customer customer, Order order,
-        decimal subtotal)
+    private static decimal RoundCurrency(decimal value)
     {
-        var discount = await _discountService.CalculateDiscountAsync(customer, order, subtotal);
-        return discount.DiscountPercent;
+        return Math.Round(value, 2, MidpointRounding.AwayFromZero);
     }
-
-    public async Task<decimal> GetDiscountAmountAsync(Customer customer, Order order,
-        decimal subtotal)
-    {
-        var discount = await _discountService.CalculateDiscountAsync(customer, order, subtotal);
-        return discount.DiscountAmount;
-    }
-
-    public decimal CalculateFinalTotal(decimal subtotal, decimal discountAmount)
-    {
-        // Keep this method focused on arithmetic; callers decide how to round and
-        // whether business rules such as a minimum total should apply.
-        return subtotal - discountAmount;
-    }
-
-
-
-
-    public async Task<PricingResult> CalculateOrderTotalsAsync(
-    Customer customer,
-    List<OrderLineItem> items)
-    {
-        // Round at the order boundaries so values stored and returned to clients
-        // consistently use currency precision.
-        decimal subtotal = Math.Round(
-            CalculateSubtotal(items),
-            2,
-            MidpointRounding.AwayFromZero);
-
-        // DiscountService selects the best applicable rule; pricing only applies
-        // the resulting percentage and amount.
-        DiscountResult discount =
-            await _discountService.CalculateDiscountAsync(customer, new Order(), subtotal);
-
-        decimal discountAmount = Math.Round(
-            discount.DiscountAmount,
-            2,
-            MidpointRounding.AwayFromZero);
-
-        decimal finalTotal = Math.Max(
-            0m,
-            Math.Round(
-                CalculateFinalTotal(subtotal, discountAmount),
-                2,
-                MidpointRounding.AwayFromZero));
-
-        var results = new PricingResult(
-            subtotal,
-            discount.DiscountPercent * 100m,
-            discountAmount,
-            finalTotal);
-
-        return results;
-    }
-
 }

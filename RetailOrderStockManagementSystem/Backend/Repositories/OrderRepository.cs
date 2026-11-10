@@ -17,7 +17,9 @@ public class OrderRepository : IOrderRepository
     // GET all orders
     public async Task<List<Order>> GetAllAsync(OrderStatus.Status? status = null)
     {
-        var query = _retailDbContext.Orders.AsNoTracking().AsQueryable();
+        var query = _retailDbContext.Orders.AsNoTracking()
+            .Include(order => order.DiscountRule)
+            .AsQueryable();
         if (status.HasValue) query = query.Where(order => order.Status == status.Value);
         return await query.OrderByDescending(order => order.OrderDate)
             .ThenByDescending(order => order.OrderId).ToListAsync();
@@ -30,6 +32,7 @@ public class OrderRepository : IOrderRepository
         // product information; CustomerId/ProductId alone are just foreign keys.
         return await _retailDbContext.Orders.AsNoTracking()
             .Include(order => order.Customer)
+            .Include(order => order.DiscountRule)
             .Include(order => order.OrderLineItems).ThenInclude(line => line.Product)
             .SingleOrDefaultAsync(order => order.OrderId == id);
     }
