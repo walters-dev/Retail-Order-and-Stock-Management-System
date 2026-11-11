@@ -26,7 +26,7 @@ public class OrderRepository : IOrderRepository
     }
 
     // GET orders ById, returns null if order is not found
-    public async Task<Order?> GetByIdAsync(int id)
+    public async Task<Order?> GetByIdAsync(Guid id)
     {
         // Include related objects because the detail response needs customer and
         // product information; CustomerId/ProductId alone are just foreign keys.
@@ -45,7 +45,7 @@ public class OrderRepository : IOrderRepository
         return order;
     }
 
-    public async Task<bool> ConfirmAsync(int id, CancellationToken cancellationToken = default)
+    public async Task<bool> ConfirmAsync(Guid id, CancellationToken cancellationToken = default)
     {
         // Confirmation changes both stock and order state, so both operations must
         // succeed together or the transaction is rolled back.
@@ -103,7 +103,7 @@ public class OrderRepository : IOrderRepository
         return true;
     }
 
-    public async Task<bool> SetStatusAsync(int id, OrderStatus.Status from, 
+    public async Task<bool> SetStatusAsync(Guid id, OrderStatus.Status from, 
         OrderStatus.Status to, CancellationToken cancellationToken = default)
     {
         // Including the current status makes the transition conditional and

@@ -52,11 +52,11 @@ namespace RetailOrderStockManagementSystem.Backend.Data
                     .HasDefaultValue(true);
 
                 entity.Property(x => x.FirstTimeCustomer)
-                    .HasColumnName("first_time_customer")
-                    .HasDefaultValue(false);
+                    .HasColumnName("first_time_customer_discount")
+                    .HasDefaultValue(true);
 
                 entity.Property(x => x.LoyalCustomer)
-                    .HasColumnName("loyal_customer")
+                    .HasColumnName("loyal_customer_discount")
                     .HasDefaultValue(false);
 
                 entity.Property(x => x.CreatedAt)
@@ -78,7 +78,7 @@ namespace RetailOrderStockManagementSystem.Backend.Data
                     .HasColumnName("first_time_customer_discount")
                     .HasDefaultValue(true);
 
-                entity.Property(x => x.LoyaltyCustomer)
+                entity.Property(x => x.LoyalCustomer)
                     .HasColumnName("loyalty_customer_discount")
                     .HasDefaultValue(false);
             });
@@ -221,11 +221,6 @@ namespace RetailOrderStockManagementSystem.Backend.Data
                     .HasColumnName("discount_amount")
                     .HasPrecision(12, 2)
                     .HasDefaultValue(0m);
-
-                //entity.Property(x => x.DiscountPercentage)
-                //    .HasColumnName("discount_percentage")
-                //    .HasPrecision(5, 2)
-                //    .HasDefaultValue(0m);
 
                 entity.Property(x => x.FinalTotal)
                     .HasColumnName("final_total")

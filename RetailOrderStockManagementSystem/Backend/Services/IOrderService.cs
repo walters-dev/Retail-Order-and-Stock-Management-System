@@ -7,10 +7,10 @@ namespace RetailOrderStockManagementSystem.Backend.Services;
 public interface IOrderService
 {
     Task<List<OrderResponseAdminDto>> GetAllAsync(OrderStatus.Status? status = null);
-    Task<OrderDetailDto?> GetByIdAsync(int id);
+    Task<OrderDetailDto?> GetByIdAsync(Guid id);
     Task<OrderDetailDto> CreateAsync(CreateOrderRequestDto dto);
     Task<OrderQuoteDto> QuoteAsync(CreateOrderRequestDto dto);
-    Task<bool> ConfirmAsync(int id, CancellationToken cancellationToken = default);
-    Task<bool> CompleteAsync(int id, CancellationToken cancellationToken = default);
-    Task<bool> CancelAsync(int id, CancellationToken cancellationToken = default);
+    Task<bool> ConfirmAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<bool> CompleteAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<bool> CancelAsync(Guid id, CancellationToken cancellationToken = default);
 }

@@ -30,7 +30,7 @@ public class OrderService : IOrderService
         return orders.Select(MapToDto).ToList();
     }
 
-    public async Task<OrderDetailDto?> GetByIdAsync(int id)
+    public async Task<OrderDetailDto?> GetByIdAsync(Guid id)
     {
         var order = await _orders.GetByIdAsync(id);
         return order == null ? null : MapToDetailDto(order);
@@ -92,19 +92,19 @@ public class OrderService : IOrderService
         return MapToDetailDto(order);
     }
 
-    public Task<bool> ConfirmAsync(int id, CancellationToken cancellationToken = default)
+    public Task<bool> ConfirmAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return _orders.ConfirmAsync(id, cancellationToken);
 
     }
 
-    public Task<bool> CompleteAsync(int id, CancellationToken cancellationToken = default)
+    public Task<bool> CompleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return _orders.SetStatusAsync(id, OrderStatus.Status.Confirmed, 
             OrderStatus.Status.Completed, cancellationToken);
     }
 
-    public Task<bool> CancelAsync(int id, CancellationToken cancellationToken = default)
+    public Task<bool> CancelAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return _orders.SetStatusAsync(id, OrderStatus.Status.Pending, 
             OrderStatus.Status.Cancelled, cancellationToken);

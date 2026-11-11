@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using RetailOrderStockManagementSystem.Backend.DTOs;
 using RetailOrderStockManagementSystem.Backend.Enums;
 using RetailOrderStockManagementSystem.Backend.Services;
+using System.ComponentModel.DataAnnotations;
 
 namespace RetailOrderStockManagementSystem.Backend.Controllers;
 
@@ -29,11 +30,19 @@ public class OrdersController : ControllerBase
     // POST/api/orders
     [Authorize(Roles = "Admin, Staff")]
     [HttpPost]
-    public async Task<IActionResult> Create(CreateOrderRequestDto dto)
+    public async Task<IActionResult> Create([FromBody] CreateOrderRequestDto dto)
     {
-        var order = await _orderService.CreateAsync(dto);
+        try
+        {
+            var order = await _orderService.CreateAsync(dto);
 
-        return CreatedAtAction(nameof(GetById), new { id = order.OrderId }, order);
+            return CreatedAtAction(nameof(GetById),
+                new { id = order.OrderId }, order);
+        }
+        catch (ValidationException ex)
+        {
+            return Conflict(new { message = ex.Message });
+        }
     }
 
     // GET/api/orders
@@ -47,7 +56,7 @@ public class OrdersController : ControllerBase
     // GET/api/orders/{id}
     [Authorize(Roles = "Admin, Staff")]
     [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetById(int id)
+    public async Task<IActionResult> GetById(Guid id)
     {
         var order = await _orderService.GetByIdAsync(id);
 
@@ -60,7 +69,7 @@ public class OrdersController : ControllerBase
     // PUT/api/orders/{id}/confirm
     [Authorize(Roles = "Admin")]
     [HttpPut("{id:int}/confirm")]
-    public async Task<IActionResult> Confirm(int id,
+    public async Task<IActionResult> Confirm(Guid id,
         CancellationToken cancellationToken)
     {
         return await ChangeStatus(id, () => 
@@ -72,7 +81,7 @@ public class OrdersController : ControllerBase
     // PUT/api/orders/{id}/complete
     [Authorize(Roles = "Admin")]
     [HttpPut("{id:int}/complete")]
-    public async Task<IActionResult> Complete(int id,
+    public async Task<IActionResult> Complete(Guid id,
         CancellationToken cancellationToken)
     {
         return await ChangeStatus(id, () => 
@@ -84,7 +93,7 @@ public class OrdersController : ControllerBase
     // PUT/api/orders/{id}/cancel
     [Authorize(Roles = "Admin, Staff")]
     [HttpPut("{id:int}/cancel")]
-    public async Task<IActionResult> Cancel(int id,
+    public async Task<IActionResult> Cancel(Guid id,
         CancellationToken cancellationToken)
     {
         return await ChangeStatus(id, () =>
@@ -93,7 +102,7 @@ public class OrdersController : ControllerBase
 
     }
 
-    private async Task<IActionResult> ChangeStatus(int id, Func<Task<bool>> change, string message, CancellationToken cancellationToken)
+    private async Task<IActionResult> ChangeStatus(Guid id, Func<Task<bool>> change, string message, CancellationToken cancellationToken)
     {
         if (!await change())
         {
