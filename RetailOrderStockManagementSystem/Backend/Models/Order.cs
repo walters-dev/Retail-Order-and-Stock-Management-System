@@ -5,7 +5,7 @@ namespace RetailOrderStockManagementSystem.Backend.Models
 {
     public class Order
     {
-        public int OrderId { get; set; }
+        public Guid OrderId { get; set; }
         public Guid CustomerId { get; set; }
         public DateOnly OrderDate { get; set; }
         public decimal Subtotal { get; set; }

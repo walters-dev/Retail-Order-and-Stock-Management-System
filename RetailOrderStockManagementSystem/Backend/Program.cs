@@ -82,6 +82,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 
 
+
 // Read the connection string saved in User Secrets.
 var connectionString =
     builder.Configuration.GetConnectionString("DefaultConnection")
