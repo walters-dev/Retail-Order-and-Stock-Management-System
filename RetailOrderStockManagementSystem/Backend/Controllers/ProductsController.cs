@@ -10,7 +10,7 @@ namespace RetailOrderStockManagementSystem.Backend.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "Admin/Staff")]
+[Authorize(Roles = "Admin, Staff")]
 public class ProductsController : ControllerBase
 {
     private readonly IProductService _productService;

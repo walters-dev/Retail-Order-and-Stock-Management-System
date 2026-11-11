@@ -8,7 +8,7 @@ namespace RetailOrderStockManagementSystem.Backend.Controllers;
 
 [ApiController]
 [Route("api/orders")]
-[Authorize(Roles = "Admin/Staff")]
+[Authorize(Roles = "Admin, Staff")]
 public class OrdersController : ControllerBase
 {
     private readonly IOrderService _orderService;
@@ -19,7 +19,7 @@ public class OrdersController : ControllerBase
     }
 
     // POST/api/orders/quote
-    [Authorize(Roles = "Admin/Staff")]
+    [Authorize(Roles = "Admin, Staff")]
     [HttpPost("quote")]
     public async Task<ActionResult<OrderQuoteDto>> Quote(CreateOrderRequestDto dto)
     {
@@ -27,7 +27,7 @@ public class OrdersController : ControllerBase
     }
 
     // POST/api/orders
-    [Authorize(Roles = "Admin/Staff")]
+    [Authorize(Roles = "Admin, Staff")]
     [HttpPost]
     public async Task<IActionResult> Create(CreateOrderRequestDto dto)
     {
@@ -45,7 +45,7 @@ public class OrdersController : ControllerBase
     }
 
     // GET/api/orders/{id}
-    [Authorize(Roles = "Admin/Staff")]
+    [Authorize(Roles = "Admin, Staff")]
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {
@@ -82,7 +82,7 @@ public class OrdersController : ControllerBase
     }
 
     // PUT/api/orders/{id}/cancel
-    [Authorize(Roles = "Admin/Staff")]
+    [Authorize(Roles = "Admin, Staff")]
     [HttpPut("{id:int}/cancel")]
     public async Task<IActionResult> Cancel(int id,
         CancellationToken cancellationToken)
