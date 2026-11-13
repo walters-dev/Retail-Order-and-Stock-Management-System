@@ -9,7 +9,6 @@ namespace RetailOrderStockManagementSystem.Backend.Models
         public Guid CustomerId { get; set; }
         public DateOnly OrderDate { get; set; }
         public decimal Subtotal { get; set; }
-        //public decimal DiscountPercentage { get; set; }
         public decimal DiscountAmount { get; set; }
         public decimal FinalTotal { get; set; }
         [JsonConverter(typeof(JsonStringEnumConverter))]
@@ -18,5 +17,14 @@ namespace RetailOrderStockManagementSystem.Backend.Models
         public DateOnly? UpdatedAt { get; set; }
         public int? DiscountRuleId { get; set; }
         public int ReceiptId { get; set; }
+        //public bool LargeOrder { get; set; }
+
+        // navigates EF to return related Customer for order details
+        public Customer? Customer { get; set; }
+        public DiscountRule? DiscountRule { get; set; }
+
+        // Creates OrderLineItem for each requested Product,
+        // then assigns that to the OrderLineItems list
+        public List<OrderLineItem> OrderLineItems { get; set; } = new(); 
     }
 }

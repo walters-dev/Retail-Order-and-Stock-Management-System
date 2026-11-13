@@ -10,6 +10,7 @@ using RetailOrderStockManagementSystem.Backend.Middleware;
 using RetailOrderStockManagementSystem.Backend.Repositories;
 using RetailOrderStockManagementSystem.Backend.Security;
 using RetailOrderStockManagementSystem.Backend.Services;
+using RetailOrderStockManagementSystem.Backend.Pricing_and_Discount;
 //using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore;
 using System.Text;
@@ -101,6 +102,14 @@ builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
 
+builder.Services.AddScoped<IOrderRepository,  OrderRepository>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+
+builder.Services.AddScoped<IDiscountRuleRepository, DiscountRuleRepository>();
+builder.Services.AddScoped<DiscountService>();
+builder.Services.AddScoped<IPricingService, PricingService>();
+
+
 var app = builder.Build();
 
 app.UseExceptionHandler();
@@ -126,6 +135,8 @@ if (app.Environment.IsDevelopment())
     //app.UseSwaggerUI();
     app.UseSwaggerUI(options => options.SwaggerEndpoint("/openapi/v1.json", "Retail-Order-and-Stock-Management-System v1"));
 }
+
+app.UseExceptionHandler();
 
 //CORS 
 

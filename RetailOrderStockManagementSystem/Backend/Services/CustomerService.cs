@@ -53,6 +53,8 @@ public class CustomerService : ICustomerService
             MobileNumber = mobileNumber,
             Email = email,
             IsActive = true,
+            FirstTimeCustomer = true,
+            LoyalCustomer = false,
             CreatedAt = DateOnly.FromDateTime(DateTime.UtcNow),
             UpdatedAt = null
         };
@@ -87,6 +89,8 @@ public class CustomerService : ICustomerService
         customer.FullName = dto.FullName.Trim();
         customer.MobileNumber = mobileNumber;
         customer.Email = email;
+        if (dto.LoyalCustomer.HasValue)
+            customer.LoyalCustomer = dto.LoyalCustomer.Value;
 
         await _repository.UpdateAsync(customer);
 
@@ -114,6 +118,8 @@ public class CustomerService : ICustomerService
             MobileNumber = customer.MobileNumber,
             Email = customer.Email,
             IsActive = customer.IsActive,
+            FirstTimeCustomer = customer.FirstTimeCustomer,
+            LoyalCustomer = customer.LoyalCustomer,
             CreatedAt = customer.CreatedAt,
             UpdatedAt = customer.UpdatedAt
         };

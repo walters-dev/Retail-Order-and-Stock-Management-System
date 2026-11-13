@@ -51,6 +51,14 @@ namespace RetailOrderStockManagementSystem.Backend.Data
                     .HasColumnName("is_active")
                     .HasDefaultValue(true);
 
+                entity.Property(x => x.FirstTimeCustomer)
+                    .HasColumnName("first_time_customer_discount")
+                    .HasDefaultValue(true);
+
+                entity.Property(x => x.LoyalCustomer)
+                    .HasColumnName("loyal_customer_discount")
+                    .HasDefaultValue(false);
+
                 entity.Property(x => x.CreatedAt)
                     .HasColumnName("created_at")
                     .HasDefaultValueSql("CURRENT_DATE");
@@ -70,7 +78,7 @@ namespace RetailOrderStockManagementSystem.Backend.Data
                     .HasColumnName("first_time_customer_discount")
                     .HasDefaultValue(true);
 
-                entity.Property(x => x.LoyaltyCustomer)
+                entity.Property(x => x.LoyalCustomer)
                     .HasColumnName("loyalty_customer_discount")
                     .HasDefaultValue(false);
             });
@@ -82,7 +90,7 @@ namespace RetailOrderStockManagementSystem.Backend.Data
                 {
                     table.HasCheckConstraint(
                         "chk_product_price",
-                        "unit_price >= 0");
+                        "unit_price > 0");
 
                     table.HasCheckConstraint(
                         "chk_stock_quantity",
@@ -214,11 +222,6 @@ namespace RetailOrderStockManagementSystem.Backend.Data
                     .HasPrecision(12, 2)
                     .HasDefaultValue(0m);
 
-                //entity.Property(x => x.DiscountPercentage)
-                //    .HasColumnName("discount_percentage")
-                //    .HasPrecision(5, 2)
-                //    .HasDefaultValue(0m);
-
                 entity.Property(x => x.FinalTotal)
                     .HasColumnName("final_total")
                     .HasPrecision(12, 2)
@@ -238,17 +241,17 @@ namespace RetailOrderStockManagementSystem.Backend.Data
                 entity.Property(x => x.DiscountRuleId)
                     .HasColumnName("discount_rule_id");
 
-                entity.HasOne<Customer>()
+                entity.HasOne(x => x.Customer)
                     .WithMany()
                     .HasForeignKey(x => x.CustomerId)
                     .OnDelete(DeleteBehavior.Restrict)
                     .HasConstraintName("fk_orders_customer");
 
-                entity.HasOne<DiscountRule>()
+                entity.HasOne(order => order.DiscountRule)
                     .WithMany()
-                    .HasForeignKey(x => x.DiscountRuleId)
-                    .OnDelete(DeleteBehavior.SetNull)
-                    .HasConstraintName("fk_orders_discount_rule");
+                    .HasForeignKey(order => order.DiscountRuleId)
+                    .HasConstraintName("fk_orders_discount_rule")
+                    .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasIndex(x => x.CustomerId)
                     .HasDatabaseName("ix_orders_customer_id");
@@ -276,6 +279,10 @@ namespace RetailOrderStockManagementSystem.Backend.Data
                     table.HasCheckConstraint(
                         "chk_line_item_quantity",
                         "quantity > 0");
+
+                    table.HasCheckConstraint(
+                        "chk_product_price",
+                        "unit_price > 0");
                 });
 
                 entity.HasKey(x => x.OrderLineItemId)
@@ -294,17 +301,21 @@ namespace RetailOrderStockManagementSystem.Backend.Data
                 entity.Property(x => x.Quantity)
                     .HasColumnName("quantity");
 
+                entity.Property(x => x.UnitPrice)
+                    .HasColumnName("unit_price")
+                    .HasPrecision(12, 2);
+
                 entity.Property(x => x.LineTotal)
                     .HasColumnName("line_total")
                     .HasPrecision(12, 2);
 
-                entity.HasOne<Order>()
-                    .WithMany()
+                entity.HasOne(x => x.Order)
+                    .WithMany(x => x.OrderLineItems)
                     .HasForeignKey(x => x.OrderId)
                     .OnDelete(DeleteBehavior.Cascade)
                     .HasConstraintName("fk_line_items_order");
 
-                entity.HasOne<Product>()
+                entity.HasOne(x => x.Product)
                     .WithMany()
                     .HasForeignKey(x => x.ProductId)
                     .OnDelete(DeleteBehavior.Restrict)

@@ -380,7 +380,7 @@ namespace RetailOrderStockManagementSystem.Backend.Migrations
 
             modelBuilder.Entity("RetailOrderStockManagementSystem.Backend.Models.Order", b =>
                 {
-                    b.HasOne("RetailOrderStockManagementSystem.Backend.Models.Customer", null)
+                    b.HasOne("RetailOrderStockManagementSystem.Backend.Models.Customer", "Customer")
                         .WithMany()
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -392,23 +392,34 @@ namespace RetailOrderStockManagementSystem.Backend.Migrations
                         .HasForeignKey("DiscountRuleId")
                         .OnDelete(DeleteBehavior.SetNull)
                         .HasConstraintName("fk_orders_discount_rule");
+
+                    b.Navigation("Customer");
                 });
 
             modelBuilder.Entity("RetailOrderStockManagementSystem.Backend.Models.OrderLineItem", b =>
                 {
-                    b.HasOne("RetailOrderStockManagementSystem.Backend.Models.Order", null)
-                        .WithMany()
+                    b.HasOne("RetailOrderStockManagementSystem.Backend.Models.Order", "Order")
+                        .WithMany("OrderLineItems")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_line_items_order");
 
-                    b.HasOne("RetailOrderStockManagementSystem.Backend.Models.Product", null)
+                    b.HasOne("RetailOrderStockManagementSystem.Backend.Models.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_line_items_product");
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("RetailOrderStockManagementSystem.Backend.Models.Order", b =>
+                {
+                    b.Navigation("OrderLineItems");
                 });
 #pragma warning restore 612, 618
         }
