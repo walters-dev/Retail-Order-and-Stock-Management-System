@@ -48,14 +48,30 @@ public class OrdersController : ControllerBase
     // GET/api/orders
     [Authorize(Roles = "Admin")]
     [HttpGet]
-    public async Task<IActionResult> GetAll([FromQuery] OrderStatus.Status? status = null)
+    public async Task<IActionResult> GetAll([FromQuery] string? status = null)
     {
-        return Ok(await _orderService.GetAllAsync(status));
+        OrderStatus.Status? parsedStatus = null;
+
+        if (!string.IsNullOrWhiteSpace(status))
+        {
+            if (!Enum.TryParse<OrderStatus.Status>(status, ignoreCase: true, out var parsed)
+                || !Enum.IsDefined(parsed))
+            {
+                return BadRequest(new
+                {
+                    message = "Status must be one of: Pending, Confirmed, Completed, Cancelled."
+                });
+            }
+
+            parsedStatus = parsed;
+        }
+
+        return Ok(await _orderService.GetAllAsync(parsedStatus));
     }
 
     // GET/api/orders/{id}
     [Authorize(Roles = "Admin, Staff")]
-    [HttpGet("{id:int}")]
+    [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id)
     {
         var order = await _orderService.GetByIdAsync(id);
@@ -68,7 +84,7 @@ public class OrdersController : ControllerBase
 
     // PUT/api/orders/{id}/confirm
     [Authorize(Roles = "Admin")]
-    [HttpPut("{id:int}/confirm")]
+    [HttpPut("{id:guid}/confirm")]
     public async Task<IActionResult> Confirm(Guid id,
         CancellationToken cancellationToken)
     {
@@ -80,7 +96,7 @@ public class OrdersController : ControllerBase
 
     // PUT/api/orders/{id}/complete
     [Authorize(Roles = "Admin")]
-    [HttpPut("{id:int}/complete")]
+    [HttpPut("{id:guid}/complete")]
     public async Task<IActionResult> Complete(Guid id,
         CancellationToken cancellationToken)
     {
@@ -92,7 +108,7 @@ public class OrdersController : ControllerBase
 
     // PUT/api/orders/{id}/cancel
     [Authorize(Roles = "Admin, Staff")]
-    [HttpPut("{id:int}/cancel")]
+    [HttpPut("{id:guid}/cancel")]
     public async Task<IActionResult> Cancel(Guid id,
         CancellationToken cancellationToken)
     {
