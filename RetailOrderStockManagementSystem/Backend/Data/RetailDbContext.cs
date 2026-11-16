@@ -233,17 +233,22 @@ namespace RetailOrderStockManagementSystem.Backend.Data
                 entity.Property(x => x.DiscountRuleId)
                     .HasColumnName("discount_rule_id");
 
+                // stops cascade delete for customers to orders, 
+                // so that if a customer is deleted, the order remains intact.
                 entity.HasOne(x => x.Customer)
                     .WithMany()
                     .HasForeignKey(x => x.CustomerId)
                     .OnDelete(DeleteBehavior.Restrict)
                     .HasConstraintName("fk_orders_customer");
 
+                // stops cascade delete for discount rules to orders,
+                // so that if a discount rule is deleted, the order remains intact.
                 entity.HasOne(order => order.DiscountRule)
                     .WithMany()
                     .HasForeignKey(order => order.DiscountRuleId)
-                    .HasConstraintName("fk_orders_discount_rule")
-                    .OnDelete(DeleteBehavior.Restrict);
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .HasConstraintName("fk_orders_discount_rule");
+                    
 
                 entity.HasIndex(x => x.CustomerId)
                     .HasDatabaseName("ix_orders_customer_id");
@@ -301,12 +306,16 @@ namespace RetailOrderStockManagementSystem.Backend.Data
                     .HasColumnName("line_total")
                     .HasPrecision(12, 2);
 
+                // Deleting an order automatically cleans up all the items inside
+                // it so you don't leave orphaned rows in your database.
                 entity.HasOne(x => x.Order)
                     .WithMany(x => x.OrderLineItems)
                     .HasForeignKey(x => x.OrderId)
                     .OnDelete(DeleteBehavior.Cascade)
                     .HasConstraintName("fk_line_items_order");
 
+                // Deleting a product is not allowed if it is referenced by any
+                // order line items.
                 entity.HasOne(x => x.Product)
                     .WithMany()
                     .HasForeignKey(x => x.ProductId)
