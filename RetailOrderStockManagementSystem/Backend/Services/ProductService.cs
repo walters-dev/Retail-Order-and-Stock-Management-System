@@ -102,7 +102,7 @@ public class ProductService : IProductService
         //product.CreatedAt = dto.CreatedAt,
         product.UpdatedAt = DateOnly.FromDateTime(DateTime.UtcNow);
 
-        await _repository.UpdateAsync(id);
+        await _repository.UpdateAsync(product);
 
         return true;
     }

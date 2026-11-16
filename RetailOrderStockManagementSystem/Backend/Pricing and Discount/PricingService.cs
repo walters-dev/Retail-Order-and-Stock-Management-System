@@ -34,17 +34,17 @@ public sealed class PricingService : IPricingService
         if (items.Count == 0)
             throw new ValidationException("An order must contain at least one line item.");
 
-        var subtotal = RoundCurrency(items.Sum(item =>
-            CalculateLineTotal(item.Quantity, item.UnitPrice)));
+        var rawSubtotal = items.Sum(item =>
+            item.Quantity * item.UnitPrice);
 
         var discountRule = await _discountService.SelectDiscountRuleAsync(
-            customer, subtotal);
+            customer, rawSubtotal);
 
         var discountPercent = discountRule?.Percent ?? 0m;
-        var discountAmount = RoundCurrency(
-            subtotal * (discountPercent / 100m));
-        var finalTotal = Math.Max(0m,
-            RoundCurrency(subtotal - discountAmount));
+        var rawDiscountAmount = rawSubtotal * (discountPercent / 100m);
+        var subtotal = RoundCurrency(rawSubtotal);
+        var discountAmount = RoundCurrency(rawDiscountAmount);
+        var finalTotal = Math.Max(0m, RoundCurrency(subtotal - discountAmount));
 
         return new OrderPricingResult
         {

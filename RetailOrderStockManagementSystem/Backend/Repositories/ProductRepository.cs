@@ -63,21 +63,11 @@ public class ProductRepository : IProductRepository
     }
 
     // PUT product using ProductId
-    public async Task<bool> UpdateAsync(int id)
+    public async Task<bool> UpdateAsync(Product product)
     {
-        // Retrieve existing product from the database
-        var product = await _retailDbContext.Products.FindAsync(id);
-
-        // Return null if Product doesn't exist
-        if (product == null)
-        {
-            return false;
-        }
-
-        // Update status instead of removing the record
+        // Update status
         product.UpdatedAt = DateOnly.FromDateTime(DateTime.UtcNow);
-        _retailDbContext.Products.Update(product);
-
+    
         // Persist/save changes to the database
         await _retailDbContext.SaveChangesAsync();
         return true;

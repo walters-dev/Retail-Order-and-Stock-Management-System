@@ -44,13 +44,17 @@ public class OrderService : IOrderService
 
     public async Task<OrderDetailDto> CreateAsync(CreateOrderRequestDto dto)
     {
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        if (dto.OrderDate < today)
+            throw new ValidationException("The order date cannot be in the past.");
+
         var (customer, lines, quote) = await CalculateAsync(dto);
 
         var order = new Order
         {
             CustomerId = customer.CustomerId,
-            OrderDate = DateOnly.FromDateTime(DateTime.UtcNow),
-            CreatedAt = DateOnly.FromDateTime(DateTime.UtcNow),
+            OrderDate = dto.OrderDate,
+            CreatedAt = today,
             Status = OrderStatus.Status.Pending,
             Subtotal = quote.Subtotal,
             DiscountRuleId = quote.DiscountRuleId,

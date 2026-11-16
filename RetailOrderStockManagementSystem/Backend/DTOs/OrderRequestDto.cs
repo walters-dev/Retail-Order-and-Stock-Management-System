@@ -9,6 +9,7 @@ public sealed class OrderLineRequestDto
 public sealed class CreateOrderRequestDto
 {
     public Guid CustomerId { get; set; }
+    public DateOnly OrderDate { get; set; }
     public List<OrderLineRequestDto> Items { get; set; } = new();
 }
 
