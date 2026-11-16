@@ -2,6 +2,9 @@
 
 namespace RetailOrderStockManagementSystem.Backend.DTOs
 {
+    /// <summary>
+    /// Defines the product fields accepted when adding a product to the catalogue.
+    /// </summary>
     public class CreateProductRequestDto
     {
         [Required(ErrorMessage = "SKU is required. Example: ABC123XY.")]

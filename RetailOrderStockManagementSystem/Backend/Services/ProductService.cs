@@ -6,6 +6,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace RetailOrderStockManagementSystem.Backend.Services;
 
+/// <summary>
+/// Coordinates product validation, uniqueness checks, business rules, and repository persistence.
+/// </summary>
 public class ProductService : IProductService
 {
     private readonly RetailDbContext _retailDbContext;

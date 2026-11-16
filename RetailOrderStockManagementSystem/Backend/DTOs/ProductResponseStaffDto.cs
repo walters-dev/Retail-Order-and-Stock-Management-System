@@ -1,5 +1,8 @@
 ﻿namespace RetailOrderStockManagementSystem.Backend.DTOs
 {
+    /// <summary>
+    /// Provides the product fields available to staff without administrative metadata.
+    /// </summary>
     public class ProductResponseStaffDto
     {
         public string SKU { get; set; } = string.Empty;

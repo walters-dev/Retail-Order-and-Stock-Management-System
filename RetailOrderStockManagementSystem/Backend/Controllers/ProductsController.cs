@@ -8,6 +8,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace RetailOrderStockManagementSystem.Backend.Controllers;
 
+/// <summary>
+/// Exposes authenticated endpoints for product catalogue and inventory operations.
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 [Authorize(Roles = "Admin, Staff")]

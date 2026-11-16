@@ -7,7 +7,9 @@ namespace RetailOrderStockManagementSystem.Backend.Services;
 public interface IOrderService
 {
     Task<List<OrderResponseAdminDto>> GetAllAsync(OrderStatus.Status? status = null);
+    Task<List<OrderResponseStaffDto>> GetAllForStaffAsync(OrderStatus.Status? status = null);
     Task<OrderDetailDto?> GetByIdAsync(Guid id);
+    Task<OrderResponseStaffDto?> GetByIdForStaffAsync(Guid id);
     Task<OrderDetailDto> CreateAsync(CreateOrderRequestDto dto);
     Task<OrderQuoteDto> QuoteAsync(CreateOrderRequestDto dto);
     Task<bool> ConfirmAsync(Guid id, CancellationToken cancellationToken = default);

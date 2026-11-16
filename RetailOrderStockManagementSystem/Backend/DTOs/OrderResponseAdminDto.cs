@@ -2,6 +2,9 @@
 
 namespace RetailOrderStockManagementSystem.Backend.DTOs
 {
+    /// <summary>
+    /// Provides the financial, status, and identity fields returned to administrators for an order.
+    /// </summary>
     public class OrderResponseAdminDto
     {
         public Guid OrderId { get; set; }

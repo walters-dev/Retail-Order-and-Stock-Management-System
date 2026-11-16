@@ -3,7 +3,9 @@ using RetailOrderStockManagementSystem.Backend.Repositories;
 
 namespace RetailOrderStockManagementSystem.Backend.Pricing_and_Discount;
 
-/// Selects the single discount rule applicable to an order.
+/// <summary>
+/// Selects the single highest-value active discount for a customer and subtotal; eligible discounts do not stack.
+/// </summary>
 public sealed class DiscountService
 {
     private const int LargeOrderDiscountRuleId = 1;

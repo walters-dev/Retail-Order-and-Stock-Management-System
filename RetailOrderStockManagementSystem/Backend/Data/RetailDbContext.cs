@@ -51,14 +51,6 @@ namespace RetailOrderStockManagementSystem.Backend.Data
                     .HasColumnName("is_active")
                     .HasDefaultValue(true);
 
-                entity.Property(x => x.FirstTimeCustomer)
-                    .HasColumnName("first_time_customer_discount")
-                    .HasDefaultValue(true);
-
-                entity.Property(x => x.LoyalCustomer)
-                    .HasColumnName("loyal_customer_discount")
-                    .HasDefaultValue(false);
-
                 entity.Property(x => x.CreatedAt)
                     .HasColumnName("created_at")
                     .HasDefaultValueSql("CURRENT_DATE");

@@ -4,6 +4,9 @@ using RetailOrderStockManagementSystem.Backend.Models;
 
 namespace RetailOrderStockManagementSystem.Backend.Repositories;
 
+/// <summary>
+/// Loads active discount rules used by the discount-selection policy.
+/// </summary>
 public sealed class DiscountRuleRepository : IDiscountRuleRepository
 {
     private readonly RetailDbContext _context;

@@ -5,6 +5,9 @@ using RetailOrderStockManagementSystem.Backend.Models;
 
 namespace RetailOrderStockManagementSystem.Backend.Repositories;
 
+/// <summary>
+/// Provides EF Core data access for products, including filtering, lookup, creation, updates, and soft deletion.
+/// </summary>
 public class ProductRepository : IProductRepository
 {
     private readonly RetailDbContext _retailDbContext;

@@ -7,6 +7,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace RetailOrderStockManagementSystem.Backend.Controllers;
 
+/// <summary>
+/// Exposes authenticated endpoints for quoting, creating, retrieving, and transitioning orders.
+/// </summary>
 [ApiController]
 [Route("api/orders")]
 [Authorize(Roles = "Admin, Staff")]
@@ -69,6 +72,30 @@ public class OrdersController : ControllerBase
         return Ok(await _orderService.GetAllAsync(parsedStatus));
     }
 
+    // GET/api/orders/staff
+    [Authorize(Roles = "Staff")]
+    [HttpGet("staff")]
+    public async Task<IActionResult> GetAllForStaff([FromQuery] string? status = null)
+    {
+        OrderStatus.Status? parsedStatus = null;
+
+        if (!string.IsNullOrWhiteSpace(status))
+        {
+            if (!Enum.TryParse<OrderStatus.Status>(status, ignoreCase: true, out var parsed)
+                || !Enum.IsDefined(parsed))
+            {
+                return BadRequest(new
+                {
+                    message = "Status must be one of: Pending, Confirmed, Completed, Cancelled."
+                });
+            }
+
+            parsedStatus = parsed;
+        }
+
+        return Ok(await _orderService.GetAllForStaffAsync(parsedStatus));
+    }
+
     // GET/api/orders/{id}
     [Authorize(Roles = "Admin, Staff")]
     [HttpGet("{id:guid}")]
@@ -78,6 +105,19 @@ public class OrdersController : ControllerBase
 
         if (order == null)
             return NotFound(new { message = $"Order {id} was not found." } );
+
+        return Ok(order);
+    }
+
+    // GET/api/orders/staff/{id}
+    [Authorize(Roles = "Staff")]
+    [HttpGet("staff/{id:guid}")]
+    public async Task<IActionResult> GetByIdForStaff(Guid id)
+    {
+        var order = await _orderService.GetByIdForStaffAsync(id);
+
+        if (order == null)
+            return NotFound(new { message = $"Order {id} was not found." });
 
         return Ok(order);
     }

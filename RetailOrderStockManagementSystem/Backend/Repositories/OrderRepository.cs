@@ -5,6 +5,9 @@ using RetailOrderStockManagementSystem.Backend.Models;
 
 namespace RetailOrderStockManagementSystem.Backend.Repositories;
 
+/// <summary>
+/// Provides order persistence, related-data loading, and guarded status transitions.
+/// </summary>
 public class OrderRepository : IOrderRepository
 {
     private readonly RetailDbContext _retailDbContext;

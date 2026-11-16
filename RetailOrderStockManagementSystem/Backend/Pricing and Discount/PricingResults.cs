@@ -1,5 +1,8 @@
 ﻿namespace RetailOrderStockManagementSystem.Backend.Pricing_and_Discount;
 
+/// <summary>
+/// Contains the calculated monetary totals and the discount rule selected for an order.
+/// </summary>
 public sealed class OrderPricingResult
 {
     public decimal Subtotal { get; set; }

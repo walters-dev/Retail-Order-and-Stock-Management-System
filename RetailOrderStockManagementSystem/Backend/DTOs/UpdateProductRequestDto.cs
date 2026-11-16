@@ -2,6 +2,9 @@
 
 namespace RetailOrderStockManagementSystem.Backend.DTOs
 {
+    /// <summary>
+    /// Defines the editable catalogue and inventory fields for an existing product.
+    /// </summary>
     public class UpdateProductRequestDto
     {
         [Required(ErrorMessage = "SKU is required. Example: ABC123XY.")]

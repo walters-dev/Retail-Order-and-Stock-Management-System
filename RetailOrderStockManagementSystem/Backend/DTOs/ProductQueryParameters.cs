@@ -2,6 +2,9 @@
 
 namespace RetailOrderStockManagementSystem.Backend.DTOs;
 
+/// <summary>
+/// Holds optional filters and paging values used when listing products.
+/// </summary>
 public class ProductQueryParameters
 {
     public string? Search { get; set; }

@@ -1,5 +1,8 @@
 ﻿namespace RetailOrderStockManagementSystem.Backend.Models
 {
+    /// <summary>
+    /// Defines a discount percentage and the minimum order amount used by applicable rules.
+    /// </summary>
     public class DiscountRule
     {
         public int DiscountRuleId { get; set; }

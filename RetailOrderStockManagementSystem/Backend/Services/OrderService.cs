@@ -8,6 +8,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace RetailOrderStockManagementSystem.Backend.Services;
 
+/// <summary>
+/// Coordinates order quotes and creation by validating customers and products, calculating pricing, and building the order graph.
+/// </summary>
 public class OrderService : IOrderService
 {
     private readonly IOrderRepository _orders;
@@ -30,10 +33,22 @@ public class OrderService : IOrderService
         return orders.Select(MapToDto).ToList();
     }
 
+    public async Task<List<OrderResponseStaffDto>> GetAllForStaffAsync(OrderStatus.Status? status = null)
+    {
+        var orders = await _orders.GetAllAsync(status);
+        return orders.Select(MapToStaffDto).ToList();
+    }
+
     public async Task<OrderDetailDto?> GetByIdAsync(Guid id)
     {
         var order = await _orders.GetByIdAsync(id);
         return order == null ? null : MapToDetailDto(order);
+    }
+
+    public async Task<OrderResponseStaffDto?> GetByIdForStaffAsync(Guid id)
+    {
+        var order = await _orders.GetByIdAsync(id);
+        return order == null ? null : MapToStaffDto(order);
     }
 
     public async Task<OrderQuoteDto> QuoteAsync(CreateOrderRequestDto dto)
@@ -209,6 +224,18 @@ public class OrderService : IOrderService
         Status = order.Status,
         CreatedAt = order.CreatedAt,
         UpdatedAt = order.UpdatedAt
+    };
+
+    private static OrderResponseStaffDto MapToStaffDto(Order order) => new()
+    {
+        OrderId = order.OrderId,
+        CustomerId = order.CustomerId,
+        OrderDate = order.OrderDate,
+        Subtotal = order.Subtotal,
+        DiscountPercent = order.DiscountRule?.Percent ?? 0m,
+        DiscountAmount = order.DiscountAmount,
+        FinalTotal = order.FinalTotal,
+        Status = order.Status
     };
 
     private static OrderDetailDto MapToDetailDto(Order order) => new()

@@ -3,6 +3,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace RetailOrderStockManagementSystem.Backend.Pricing_and_Discount;
 
+/// <summary>
+/// Calculates line totals, subtotals, discounts, and invoice-consistent final totals.
+/// Calculations use unrounded values until currency values are finalized for output.
+/// </summary>
 public sealed class PricingService : IPricingService
 {
     private readonly DiscountService _discountService;
