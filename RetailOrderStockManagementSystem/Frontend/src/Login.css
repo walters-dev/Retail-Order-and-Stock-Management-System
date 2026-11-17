@@ -24,6 +24,10 @@ div{
     /* display: flex; */
     margin: auto;
     /* padding: 100px; */
+    /* height:100%; 
+    width:100%; */
+    /* width: 100vw;
+  min-height: 100vh; */
 }
 button{
     margin: 2px;
