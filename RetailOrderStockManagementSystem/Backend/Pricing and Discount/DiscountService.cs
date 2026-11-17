@@ -1,26 +1,19 @@
+using Microsoft.EntityFrameworkCore;
+using RetailOrderStockManagementSystem.Backend.Data;
 using RetailOrderStockManagementSystem.Backend.Models;
-using RetailOrderStockManagementSystem.Backend.Repositories;
 
-namespace RetailOrderStockManagementSystem.Backend.Pricing_and_Discount;
-
-/// <summary>
-/// Selects the single highest-value active discount for a customer and subtotal; eligible discounts do not stack.
-/// </summary>
+// Evaluates active discount rules from the database to find the single best discount for an order.
 public sealed class DiscountService
 {
-    private const int LargeOrderDiscountRuleId = 1;
-    private const int FirstTimeCustomerDiscountRuleId = 2;
-    private const int LoyaltyDiscountRuleId = 3;
+    private readonly RetailDbContext _dbContext;
 
-    private readonly IDiscountRuleRepository _discountRuleRepository;
-
-    public DiscountService(IDiscountRuleRepository discountRuleRepository)
+    public DiscountService(RetailDbContext dbContext)
     {
-        _discountRuleRepository = discountRuleRepository;
+        _dbContext = dbContext;
     }
 
     // Returns the highest eligible active discount rule, or null when no rule applies.
-    // Discounts do not stack.
+    // Discounts do not stack; ties are broken by the lowest DiscountRuleId.
     public async Task<DiscountRule?> SelectDiscountRuleAsync(
         Customer customer,
         decimal subtotal,
@@ -29,12 +22,18 @@ public sealed class DiscountService
         ArgumentNullException.ThrowIfNull(customer);
 
         if (subtotal < 0m)
+        {
             throw new ArgumentOutOfRangeException(
                 nameof(subtotal), subtotal, "Subtotal cannot be negative.");
+        }
 
-        var activeRules = await _discountRuleRepository
-            .GetActiveRulesAsync(cancellationToken);
+        // Load only active rules as read-only (no change tracking) for better query performance.
+        var activeRules = await _dbContext.DiscountRules
+            .AsNoTracking()
+            .Where(rule => rule.IsActive)
+            .ToListAsync(cancellationToken);
 
+        // Filter to rules the customer qualifies for, then pick the one with the highest percentage.
         return activeRules
             .Where(rule => IsEligible(rule, customer, subtotal))
             .OrderByDescending(rule => rule.Percent)
@@ -42,19 +41,17 @@ public sealed class DiscountService
             .FirstOrDefault();
     }
 
+    // Checks whether the customer and order meet the condition for a specific discount rule.
     private static bool IsEligible(
         DiscountRule rule,
         Customer customer,
         decimal subtotal)
     {
-        return rule.DiscountRuleId switch
+        return rule.Name.Trim() switch
         {
-            LargeOrderDiscountRuleId =>
-                subtotal >= rule.MinimumOrderAmount,
-            FirstTimeCustomerDiscountRuleId =>
-                customer.FirstTimeCustomer,
-            LoyaltyDiscountRuleId =>
-                customer.LoyalCustomer,
+            "Large Order Discount" => subtotal >= rule.MinimumOrderAmount,
+            "First Time Customer Discount" => customer.FirstTimeCustomer,
+            "Loyalty Discount" => customer.LoyaltyCustomer,
             _ => false
         };
     }

@@ -105,14 +105,13 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IOrderRepository,  OrderRepository>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 
-builder.Services.AddScoped<IDiscountRuleRepository, DiscountRuleRepository>();
 builder.Services.AddScoped<DiscountService>();
 builder.Services.AddScoped<IPricingService, PricingService>();
 
 
 var app = builder.Build();
 
-app.UseExceptionHandler();
+//app.UseExceptionHandler();
 
 // Temporary connection check.
 using (var scope = app.Services.CreateScope())

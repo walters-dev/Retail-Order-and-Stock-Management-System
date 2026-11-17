@@ -70,7 +70,7 @@ namespace RetailOrderStockManagementSystem.Backend.Data
                     .HasColumnName("first_time_customer_discount")
                     .HasDefaultValue(true);
 
-                entity.Property(x => x.LoyalCustomer)
+                entity.Property(x => x.LoyaltyCustomer)
                     .HasColumnName("loyalty_customer_discount")
                     .HasDefaultValue(false);
             });
@@ -246,15 +246,17 @@ namespace RetailOrderStockManagementSystem.Backend.Data
                 entity.HasOne(order => order.DiscountRule)
                     .WithMany()
                     .HasForeignKey(order => order.DiscountRuleId)
-                    .OnDelete(DeleteBehavior.Restrict)
+                    .OnDelete(DeleteBehavior.SetNull)
                     .HasConstraintName("fk_orders_discount_rule");
-                    
 
+                // Create non-unique indexes on foreign keys to prevent full table scans during CQRS read queries
+                // and speed up joins with Customer and DiscountRule tables. Explicit snake_case names are set
+                // to match database naming conventions.
                 entity.HasIndex(x => x.CustomerId)
                     .HasDatabaseName("ix_orders_customer_id");
-
                 entity.HasIndex(x => x.DiscountRuleId)
                     .HasDatabaseName("ix_orders_discount_rule_id");
+
                 modelBuilder.Entity<Order>(order =>
                 {
                     order.Property(x => x.ReceiptId)
@@ -298,6 +300,8 @@ namespace RetailOrderStockManagementSystem.Backend.Data
                 entity.Property(x => x.Quantity)
                     .HasColumnName("quantity");
 
+                // Map UnitPrice to a snake_case column and enforce exact decimal precision (10 whole digits, 2 decimal places)
+                // to prevent rounding errors and silent truncation on monetary values.
                 entity.Property(x => x.UnitPrice)
                     .HasColumnName("unit_price")
                     .HasPrecision(12, 2);
