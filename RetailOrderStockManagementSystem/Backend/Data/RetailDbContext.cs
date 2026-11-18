@@ -214,11 +214,6 @@ namespace RetailOrderStockManagementSystem.Backend.Data
                     .HasPrecision(12, 2)
                     .HasDefaultValue(0m);
 
-                //entity.Property(x => x.DiscountPercentage)
-                //    .HasColumnName("discount_percentage")
-                //    .HasPrecision(5, 2)
-                //    .HasDefaultValue(0m);
-
                 entity.Property(x => x.FinalTotal)
                     .HasColumnName("final_total")
                     .HasPrecision(12, 2)
