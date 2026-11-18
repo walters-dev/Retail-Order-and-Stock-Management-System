@@ -238,7 +238,7 @@ namespace RetailOrderStockManagementSystem.Backend.Data
                 entity.HasOne(x => x.Customer)
                     .WithMany()
                     .HasForeignKey(x => x.CustomerId)
-                    .OnDelete(DeleteBehavior.SetNull)
+                    .OnDelete(DeleteBehavior.Restrict)
                     .HasConstraintName("fk_orders_customer");
 
                 // stops cascade delete for discount rules to orders,
