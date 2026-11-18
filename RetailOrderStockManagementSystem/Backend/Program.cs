@@ -4,9 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using RetailOrderStockManagementSystem.Backend.Data;
+using RetailOrderStockManagementSystem.Backend.Data.Repositories;
 using RetailOrderStockManagementSystem.Backend.Enums;
 using RetailOrderStockManagementSystem.Backend.Mapper;
 using RetailOrderStockManagementSystem.Backend.Middleware;
+using RetailOrderStockManagementSystem.Backend.Pricing_and_Discount;
 using RetailOrderStockManagementSystem.Backend.Repositories;
 using RetailOrderStockManagementSystem.Backend.Security;
 using RetailOrderStockManagementSystem.Backend.Services;
@@ -101,9 +103,17 @@ builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
 
+builder.Services.AddScoped<IDiscountRuleRepository, DiscountRuleRepository>();
+builder.Services.AddScoped<IOrderRepository,  OrderRepository>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+
+builder.Services.AddScoped<DiscountService>();
+builder.Services.AddScoped<IPricingService, PricingService>();
+
+
 var app = builder.Build();
 
-app.UseExceptionHandler();
+//app.UseExceptionHandler();
 
 // Temporary connection check.
 using (var scope = app.Services.CreateScope())
@@ -126,6 +136,8 @@ if (app.Environment.IsDevelopment())
     //app.UseSwaggerUI();
     app.UseSwaggerUI(options => options.SwaggerEndpoint("/openapi/v1.json", "Retail-Order-and-Stock-Management-System v1"));
 }
+
+app.UseExceptionHandler();
 
 //CORS 
 
