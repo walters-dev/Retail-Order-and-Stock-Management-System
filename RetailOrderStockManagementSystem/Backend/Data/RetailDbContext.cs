@@ -233,23 +233,30 @@ namespace RetailOrderStockManagementSystem.Backend.Data
                 entity.Property(x => x.DiscountRuleId)
                     .HasColumnName("discount_rule_id");
 
-                entity.HasOne<Customer>()
+                // stops cascade delete for customers to orders, 
+                // so that if a customer is deleted, the order remains intact.
+                entity.HasOne(x => x.Customer)
                     .WithMany()
                     .HasForeignKey(x => x.CustomerId)
                     .OnDelete(DeleteBehavior.Restrict)
                     .HasConstraintName("fk_orders_customer");
 
-                entity.HasOne<DiscountRule>()
+                // stops cascade delete for discount rules to orders,
+                // so that if a discount rule is deleted, the order remains intact.
+                entity.HasOne(order => order.DiscountRule)
                     .WithMany()
-                    .HasForeignKey(x => x.DiscountRuleId)
+                    .HasForeignKey(order => order.DiscountRuleId)
                     .OnDelete(DeleteBehavior.SetNull)
                     .HasConstraintName("fk_orders_discount_rule");
 
+                // Create non-unique indexes on foreign keys to prevent full table scans during CQRS read queries
+                // and speed up joins with Customer and DiscountRule tables. Explicit snake_case names are set
+                // to match database naming conventions.
                 entity.HasIndex(x => x.CustomerId)
                     .HasDatabaseName("ix_orders_customer_id");
-
                 entity.HasIndex(x => x.DiscountRuleId)
                     .HasDatabaseName("ix_orders_discount_rule_id");
+
                 modelBuilder.Entity<Order>(order =>
                 {
                     order.Property(x => x.ReceiptId)
@@ -271,6 +278,10 @@ namespace RetailOrderStockManagementSystem.Backend.Data
                     table.HasCheckConstraint(
                         "chk_line_item_quantity",
                         "quantity > 0");
+
+                    table.HasCheckConstraint(
+                        "chk_product_price",
+                        "unit_price > 0");
                 });
 
                 entity.HasKey(x => x.OrderLineItemId)
@@ -289,17 +300,27 @@ namespace RetailOrderStockManagementSystem.Backend.Data
                 entity.Property(x => x.Quantity)
                     .HasColumnName("quantity");
 
+                // Map UnitPrice to a snake_case column and enforce exact decimal precision (10 whole digits, 2 decimal places)
+                // to prevent rounding errors and silent truncation on monetary values.
+                entity.Property(x => x.UnitPrice)
+                    .HasColumnName("unit_price")
+                    .HasPrecision(12, 2);
+
                 entity.Property(x => x.LineTotal)
                     .HasColumnName("line_total")
                     .HasPrecision(12, 2);
 
-                entity.HasOne<Order>()
-                    .WithMany()
+                // Deleting an order automatically cleans up all the items inside
+                // it so you don't leave orphaned rows in your database.
+                entity.HasOne(x => x.Order)
+                    .WithMany(x => x.OrderLineItems)
                     .HasForeignKey(x => x.OrderId)
                     .OnDelete(DeleteBehavior.Cascade)
                     .HasConstraintName("fk_line_items_order");
 
-                entity.HasOne<Product>()
+                // Deleting a product is not allowed if it is referenced by any
+                // order line items.
+                entity.HasOne(x => x.Product)
                     .WithMany()
                     .HasForeignKey(x => x.ProductId)
                     .OnDelete(DeleteBehavior.Restrict)
