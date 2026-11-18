@@ -16,5 +16,6 @@ namespace RetailOrderStockManagementSystem.Backend.DTOs
         public string? Email { get; set; }
 
         public bool LoyaltyCustomer { get; set; }
+
     }
 }
