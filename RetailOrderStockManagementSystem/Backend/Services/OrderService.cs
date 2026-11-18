@@ -251,12 +251,13 @@ public class OrderService : IOrderService
         Status = order.Status,
         CreatedAt = order.CreatedAt,
         UpdatedAt = order.UpdatedAt,
-        Customer = order.Customer == null ? null : new CustomerOrderDto
+        Customer = order.Customer == null ? null : new CustomerResponseStaffDto
         {
             CustomerId = order.Customer.CustomerId,
             FullName = order.Customer.FullName,
             MobileNumber = order.Customer.MobileNumber,
-            Email = order.Customer.Email
+            Email = order.Customer.Email,
+            IsActive = order.Customer.IsActive
         },
         Items = order.OrderLineItems.Select(line => new OrderLineDetailDto
         {
