@@ -9,7 +9,7 @@ namespace RetailOrderStockManagementSystem.Backend.DTOs
     {
         public Guid OrderId { get; set; }
         public Guid CustomerId { get; set; }
-        public DateOnly OrderDate { get; set; }
+        public DateOnly OrderDate { get; set; } 
         public decimal Subtotal { get; set; }
         public int? DiscountRuleId { get; set; }
         public decimal DiscountPercent { get; set; }

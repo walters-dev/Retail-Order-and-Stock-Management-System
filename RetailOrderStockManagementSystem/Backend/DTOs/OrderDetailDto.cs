@@ -5,6 +5,6 @@ namespace RetailOrderStockManagementSystem.Backend.DTOs;
 /// </summary>
 public sealed class OrderDetailDto : OrderResponseAdminDto
 {
-    public CustomerOrderDto? Customer { get; set; }
+    public CustomerResponseStaffDto? Customer { get; set; }
     public List<OrderLineDetailDto> Items { get; set; } = new();
 }

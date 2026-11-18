@@ -11,7 +11,7 @@ namespace RetailOrderStockManagementSystem.Backend.Models
     {
         public Guid OrderId { get; set; }
         public Guid CustomerId { get; set; }
-        public DateOnly OrderDate { get; set; }
+        public DateOnly OrderDate { get; set; } = DateOnly.FromDateTime(DateTime.Now);
         public decimal Subtotal { get; set; }
         public decimal DiscountAmount { get; set; }
         public decimal FinalTotal { get; set; }

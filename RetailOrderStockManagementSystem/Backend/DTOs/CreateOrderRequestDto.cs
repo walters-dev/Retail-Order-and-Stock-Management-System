@@ -6,6 +6,6 @@ namespace RetailOrderStockManagementSystem.Backend.DTOs;
 public sealed class CreateOrderRequestDto
 {
     public Guid CustomerId { get; set; }
-    public DateOnly OrderDate { get; set; }
+    public DateOnly OrderDate { get; set; } = DateOnly.FromDateTime(DateTime.Now);
     public List<OrderLineRequestDto> Items { get; set; } = new();
 }

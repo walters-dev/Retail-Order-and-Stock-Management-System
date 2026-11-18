@@ -145,10 +145,12 @@ public class ProductService : IProductService
 
     private static ProductResponseStaffDto MapToStaffDto(Product p) => new()
     {
+        ProductId = p.ProductId,
         SKU = p.SKU,
         Name = p.Name,
         Category = p.Category,
         UnitPrice = p.UnitPrice,
-        StockQuantity = p.StockQuantity
+        StockQuantity = p.StockQuantity,
+        IsActive = p.IsActive
     };
 }
