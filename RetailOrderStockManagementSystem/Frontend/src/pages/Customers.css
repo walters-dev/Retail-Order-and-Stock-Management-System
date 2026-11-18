@@ -1,0 +1,28 @@
+.customers-layout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.customers-list {
+  flex: 2 1 320px;
+}
+
+.customer-editor {
+  flex: 1 1 240px;
+  padding: 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+}
+
+.customer-editor form {
+  display: grid;
+  gap: 12px;
+}
+
+.customer-editor input:not([type="checkbox"]) {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
