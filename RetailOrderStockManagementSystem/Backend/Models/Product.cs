@@ -1,5 +1,8 @@
 ﻿namespace RetailOrderStockManagementSystem.Backend.Models
 {
+    /// <summary>
+    /// Represents a sellable product, including its catalogue data, price, stock, and active state.
+    /// </summary>
     public class Product
     {
         public int ProductId { get; set; }

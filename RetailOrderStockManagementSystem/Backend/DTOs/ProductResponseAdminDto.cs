@@ -1,5 +1,8 @@
 ﻿namespace RetailOrderStockManagementSystem.Backend.DTOs
 {
+    /// <summary>
+    /// Provides the full product representation returned to administrative users.
+    /// </summary>
     public class ProductResponseAdminDto
     {
         public int ProductId { get; set; }
