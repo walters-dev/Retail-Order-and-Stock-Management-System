@@ -4,13 +4,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using RetailOrderStockManagementSystem.Backend.Data;
+using RetailOrderStockManagementSystem.Backend.Data.Repositories;
 using RetailOrderStockManagementSystem.Backend.Enums;
 using RetailOrderStockManagementSystem.Backend.Mapper;
 using RetailOrderStockManagementSystem.Backend.Middleware;
+using RetailOrderStockManagementSystem.Backend.Pricing_and_Discount;
 using RetailOrderStockManagementSystem.Backend.Repositories;
 using RetailOrderStockManagementSystem.Backend.Security;
 using RetailOrderStockManagementSystem.Backend.Services;
-using RetailOrderStockManagementSystem.Backend.Pricing_and_Discount;
 //using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore;
 using System.Text;
@@ -102,6 +103,7 @@ builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
 
+builder.Services.AddScoped<IDiscountRuleRepository, DiscountRuleRepository>();
 builder.Services.AddScoped<IOrderRepository,  OrderRepository>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 

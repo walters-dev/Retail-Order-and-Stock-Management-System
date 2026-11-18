@@ -1,15 +1,16 @@
-using Microsoft.EntityFrameworkCore;
-using RetailOrderStockManagementSystem.Backend.Data;
+using RetailOrderStockManagementSystem.Backend.Data.Repositories;
 using RetailOrderStockManagementSystem.Backend.Models;
 
-// Evaluates active discount rules from the database to find the single best discount for an order.
+namespace RetailOrderStockManagementSystem.Backend.Services;
+
+// Evaluates active discount rules to find the single best discount for an order.
 public sealed class DiscountService
 {
-    private readonly RetailDbContext _dbContext;
+    private readonly IDiscountRuleRepository _discountRuleRepository;
 
-    public DiscountService(RetailDbContext dbContext)
+    public DiscountService(IDiscountRuleRepository discountRuleRepository)
     {
-        _dbContext = dbContext;
+        _discountRuleRepository = discountRuleRepository;
     }
 
     // Returns the highest eligible active discount rule, or null when no rule applies.
@@ -27,11 +28,7 @@ public sealed class DiscountService
                 nameof(subtotal), subtotal, "Subtotal cannot be negative.");
         }
 
-        // Load only active rules as read-only (no change tracking) for better query performance.
-        var activeRules = await _dbContext.DiscountRules
-            .AsNoTracking()
-            .Where(rule => rule.IsActive)
-            .ToListAsync(cancellationToken);
+        var activeRules = await _discountRuleRepository.GetActiveRulesAsync(cancellationToken);
 
         // Filter to rules the customer qualifies for, then pick the one with the highest percentage.
         return activeRules

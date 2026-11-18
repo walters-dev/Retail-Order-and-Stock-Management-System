@@ -15,6 +15,6 @@ namespace RetailOrderStockManagementSystem.Backend.DTOs
         [StringLength(255, ErrorMessage = "Email cannot exceed 255 characters.")]
         public string? Email { get; set; }
 
-        public bool LoyalCustomer { get; set; }
+        public bool LoyaltyCustomer { get; set; }
     }
 }

@@ -89,7 +89,7 @@ public class CustomerService : ICustomerService
         customer.FullName = dto.FullName.Trim();
         customer.MobileNumber = mobileNumber;
         customer.Email = email;
-        customer.LoyaltyCustomer = dto.LoyalCustomer;
+        customer.LoyaltyCustomer = dto.LoyaltyCustomer;
 
         await _repository.UpdateAsync(customer);
 
@@ -118,7 +118,7 @@ public class CustomerService : ICustomerService
             Email = customer.Email,
             IsActive = customer.IsActive,
             FirstTimeCustomer = customer.FirstTimeCustomer,
-            LoyalCustomer = customer.LoyaltyCustomer,
+            LoyaltyCustomer = customer.LoyaltyCustomer,
             CreatedAt = customer.CreatedAt,
             UpdatedAt = customer.UpdatedAt
         };

@@ -8,7 +8,7 @@
         public string? Email { get; set; }
         public bool IsActive { get; set; }
         public bool FirstTimeCustomer { get; set; }
-        public bool LoyalCustomer { get; set; }
+        public bool LoyaltyCustomer { get; set; }
         public DateOnly CreatedAt { get; set; }
         public DateOnly? UpdatedAt { get; set; }
     }

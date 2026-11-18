@@ -1,4 +1,5 @@
 ﻿using RetailOrderStockManagementSystem.Backend.Models;
+using RetailOrderStockManagementSystem.Backend.Services;
 using System.ComponentModel.DataAnnotations;
 
 namespace RetailOrderStockManagementSystem.Backend.Pricing_and_Discount;
