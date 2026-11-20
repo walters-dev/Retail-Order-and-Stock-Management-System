@@ -108,6 +108,21 @@ public class CustomerService : ICustomerService
         return true;
     }
 
+    public async Task<bool> ReactivateAsync(Guid id)
+    {
+        var customer = await _repository.GetByIdAsync(id);
+
+        if (customer == null) return false;
+
+        if (!customer.IsActive)
+        {
+            customer.IsActive = true;
+            await _repository.UpdateAsync(customer);
+        }
+
+        return true;
+    }
+
     private CustomerResponseAdminDto MapToDto(Customer customer)
     {
         return new CustomerResponseAdminDto

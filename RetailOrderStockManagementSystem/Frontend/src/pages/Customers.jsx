@@ -20,8 +20,8 @@ export default function Customers ()  {
   isBusy becomes true when either operation is running, 
   using the same || operator as C#. */
   const [isSaving, setIsSaving] = useState(false)
-  const [isDeactivating, setIsDeactivating] = useState(false)
-  const isBusy = isSaving || isDeactivating
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
+  const isBusy = isSaving || isUpdatingStatus
 
   // Load customers when this component appears. Cancel the request during cleanup.
   useEffect(() => {
@@ -99,14 +99,14 @@ export default function Customers ()  {
     }
 
     if (isEditing) {
-      request.isActive = formData.has('isActive')
+      request.loyaltyCustomer = formData.has('loyaltyCustomer')
+    }
 
     const url = isEditing
       ? `https://localhost:7041/api/customers/${customerId}`
       : 'https://localhost:7041/api/customers'
 
     setIsSaving(true)
-    }
     try {
       const response = await fetch(url, {
         method: isEditing ? 'PUT' : 'POST',
@@ -160,44 +160,43 @@ export default function Customers ()  {
     }
   }
 
-  async function handleDeactivate() {
+  async function handleStatusChange() {
   if (isBusy) return
 
   const customerId = selectedCustomer.id
+  const nextIsActive = !selectedCustomer.isActive
 
   setFormError('')
-  setIsDeactivating(true)
+  setIsUpdatingStatus(true)
 
   try {
     const response = await fetch(
-      `https://localhost:7041/api/customers/${customerId}/isActive`,
+      `https://localhost:7041/api/customers/${customerId}/isActive?isActive=${nextIsActive}`,
       { method: 'PUT' }
     )
 
     if (!response.ok) {
-      setFormError('Customer could not be deactivated. Please try again.')
+      setFormError('Customer status could not be updated. Please try again.')
       return
     }
 
-    // Update the matching customer's status in the table.
     setCustomers((currentCustomers) =>
       currentCustomers.map((customer) =>
         customer.id === customerId
-          ? { ...customer, isActive: false }
+          ? { ...customer, isActive: nextIsActive }
           : customer
       )
     )
 
-    // Update the status displayed in the open form.
     setSelectedCustomer((currentCustomer) => ({
       ...currentCustomer,
-      isActive: false,
+      isActive: nextIsActive,
     }))
   } catch (error) {
     console.error(error)
-    setFormError('Unable to deactivate the customer. Please try again.')
+    setFormError('Unable to update customer status. Please try again.')
   } finally {
-    setIsDeactivating(false)
+    setIsUpdatingStatus(false)
   }
 }
 
@@ -232,12 +231,12 @@ export default function Customers ()  {
             type="search"
             value={searchText}
             onChange={(event) => setSearchText(event.target.value)}
-            disabled={isSaving}
+            disabled={isBusy}
           />
           <button
             type="button"
             onClick={() => openForm(blankCustomer)}
-            disabled={isSaving}
+            disabled={isBusy}
           >
             + Add Customer
           </button>
@@ -267,12 +266,18 @@ export default function Customers ()  {
                 <tr key={customer.id}>
                   <td>{customer.fullName}</td>
                   <td>{customer.mobileNumber}</td>
-                  <td>{customer.isActive ? 'Active' : 'Inactive'}</td>
+                  <td>
+                    <span
+                      className={customer.isActive ? 'status-active' : 'status-inactive'}
+                    >
+                      {customer.isActive ? 'Active' : 'Inactive'}
+                    </span>
+                  </td>
                   <td>
                     <button
                       type="button"
                       onClick={() => openForm(customer)}
-                      disabled={isSaving}
+                      disabled={isBusy}
                     >
                       Edit
                     </button>
@@ -288,9 +293,10 @@ export default function Customers ()  {
             <h2>{selectedCustomer.id ? 'Edit Customer' : 'Add Customer'}</h2>
 
             <form
+              /*aria-busy tells screen readers that the form is processing an action.*/
               key={selectedCustomer.id ?? 'new'}
               onSubmit={handleSave}
-              aria-busy={isSaving}
+              aria-busy={isBusy}
             >
               <label>
                 Full name
@@ -298,7 +304,7 @@ export default function Customers ()  {
                   name="fullName"
                   defaultValue={selectedCustomer.fullName}
                   required
-                  disabled={isSaving}
+                  disabled={isBusy}
                 />
               </label>
 
@@ -309,7 +315,7 @@ export default function Customers ()  {
                   type="tel"
                   defaultValue={selectedCustomer.mobileNumber}
                   required
-                  disabled={isSaving}
+                  disabled={isBusy}
                 />
               </label>
 
@@ -319,7 +325,7 @@ export default function Customers ()  {
                   name="email"
                   type="email"
                   defaultValue={selectedCustomer.email ?? ''}
-                  disabled={isSaving}
+                  disabled={isBusy}
                 />
               </label>
 
@@ -329,7 +335,7 @@ export default function Customers ()  {
                     name="loyaltyCustomer"
                     type="checkbox"
                     defaultChecked={selectedCustomer.loyaltyCustomer}
-                    disabled={isSaving}
+                    disabled={isBusy}
                   />
                   Loyalty customer
                 </label>
@@ -338,13 +344,17 @@ export default function Customers ()  {
               {formError && <p role="alert">{formError}</p>}
 
               <div>
-              {selectedCustomer.id && selectedCustomer.isActive && (
+              {selectedCustomer.id && (
                 <button
                   type="button"
-                  onClick={handleDeactivate}
+                  onClick={handleStatusChange}
                   disabled={isBusy}
                 >
-                  {isDeactivating ? 'Deactivating…' : 'Deactivate customer'}
+                  {isUpdatingStatus
+                    ? 'Updating status…'
+                    : selectedCustomer.isActive
+                      ? 'Deactivate customer'
+                      : 'Reactivate customer'}
                 </button>
               )}
 
