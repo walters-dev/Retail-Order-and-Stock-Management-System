@@ -8,14 +8,13 @@ export default defineConfig({
     react(),
     babel({ presets: [reactCompilerPreset()] })
   ],
-  server: {    
-     proxy: {      
-      '/api': {        
-        target: 'http://localhost:5162/',        
-        changeOrigin: true,        
-        // Optional: remove '/api' prefix before forwarding to backend
-        // rewrite: (path) => path.replace(/^\/api/, ''),      
-        },    
-      },  
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://localhost:7041',
+        changeOrigin: true,
+        secure: false,
+      },
     },
+  },
 })
