@@ -32,7 +32,7 @@ export default function App() {
             element={<OrderDetails />}/>
           <Route path="/orders" element={<Orders />} />
           <Route
-            path="/"
+            path exact ="/"
             element={<Navigate to="/customers" replace />}
           />
 
