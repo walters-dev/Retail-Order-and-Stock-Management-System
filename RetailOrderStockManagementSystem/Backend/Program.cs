@@ -110,6 +110,16 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<DiscountService>();
 builder.Services.AddScoped<IPricingService, PricingService>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("ReactFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 
 var app = builder.Build();
 
@@ -143,6 +153,9 @@ app.UseExceptionHandler();
 
 
 app.UseHttpsRedirection();
+
+app.UseRouting();
+app.UseCors("ReactFrontend");
 
 app.UseAuthentication();
 app.UseAuthorization();

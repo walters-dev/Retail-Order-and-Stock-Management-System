@@ -21,5 +21,7 @@ namespace RetailOrderStockManagementSystem.Backend.Services
         
         // Delete
         Task<bool> DeleteAsync(Guid customerId);
+        // Reactivate Customer
+        Task<bool> ReactivateAsync(Guid id);
     }
 }
