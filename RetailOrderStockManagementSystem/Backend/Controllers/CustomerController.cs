@@ -76,13 +76,17 @@ namespace RetailOrderStockManagementSystem.Backend.Controllers
             
         }
 
-        // DELETE /api/customers/{id}
+        // PUT /api/customers/{id}/isActive?isActive=true
         [HttpPut("{id:guid}/isActive")]
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<IActionResult> SetActive(
+            Guid id,
+            [FromQuery] bool isActive = false)
         {
-            bool deleted = await _customerService.DeleteAsync(id);
+            bool updated = isActive
+                ? await _customerService.ReactivateAsync(id)
+                : await _customerService.DeleteAsync(id);
 
-            if (!deleted) return NotFound();
+            if (!updated) return NotFound();
 
             var customer = await _customerService.GetByIdAsync(id);
 

@@ -121,6 +121,7 @@ builder.Services.AddCors(options =>
     });
 });
 
+
 var app = builder.Build();
 
 //app.UseExceptionHandler();
@@ -155,7 +156,7 @@ app.UseExceptionHandler();
 app.UseHttpsRedirection();
 
 app.UseRouting();
-app.UseCors("ReactFrontend"); 
+app.UseCors("ReactFrontend");
 
 app.UseAuthentication();
 app.UseAuthorization();
