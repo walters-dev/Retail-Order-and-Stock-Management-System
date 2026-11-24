@@ -1,6 +1,7 @@
+import { useState, useEffect } from 'react'
 import { Link, useParams } from 'react-router'
-import { sampleOrders } from './sampleOrders.js'
 import './Orders.css'
+import OrderActions from './OrderActions.jsx' 
 
 const currencyFormatter = new Intl.NumberFormat('en-ZA', {
   style: 'currency',
@@ -9,20 +10,62 @@ const currencyFormatter = new Intl.NumberFormat('en-ZA', {
 
 export default function OrderDetails() {
   const { orderId } = useParams()
+  const [orders, setOrders] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
 
-  const order = sampleOrders.find(
-    (item) => item.orderId === orderId
-  )
+   // Load this order from the backend when the page opens or the ID changes.
+   useEffect(() => {
+    const controller = new AbortController()
 
-  if (!order) {
+    async function loadOrder() {
+      try {
+        const response = await fetch(`/api/orders/${orderId}`, {
+          signal: controller.signal,
+        })
+
+        if (response.status === 404) throw new Error('Order not found.')
+        if (!response.ok) {
+          throw new Error(`Order request failed (${response.status})`)
+        }
+
+        const data = await response.json()
+        if (controller.signal.aborted) return
+
+        setOrder(data)
+      } catch (error) {
+        if (controller.signal.aborted) return
+
+        console.error(error)
+        setLoadError(error.message)
+      } finally {
+        if (!controller.signal.aborted) setIsLoading(false)
+      }
+    }
+
+    loadOrder()
+    return () => controller.abort()
+  }, [orderId])
+
+  if (isLoading) {
+    return (
+      <main>
+        <h1>Order</h1>
+        <p role="status">Loading order…</p>
+      </main>
+    )
+  }
+
+  if (loadError || !order) {
     return (
       <main>
         <h1>Order not found</h1>
-        <p>That order is not in the sample data.</p>
+        <p role="alert">{loadError || 'That order could not be loaded.'}</p>
         <Link to="/orders">Back to orders</Link>
       </main>
     )
   }
+
 
   // Use an empty array if items are missing.
   const items = order.items ?? []
@@ -47,6 +90,8 @@ export default function OrderDetails() {
             {order.status}
           </span>
         </div>
+
+        <OrderActions order={order} onStatusChanged={setOrder} />
 
         <section className="order-customer">
           <h2>Customer</h2>

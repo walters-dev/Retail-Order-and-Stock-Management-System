@@ -30,7 +30,7 @@ export default function Customers ()  {
     async function loadCustomers() {
       try {
         const response = await fetch(
-          'https://localhost:7041/api/customers',
+          '/api/customers',
           { signal: controller.signal }
         )
 

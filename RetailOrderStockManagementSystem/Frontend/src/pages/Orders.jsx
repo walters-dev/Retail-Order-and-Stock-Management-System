@@ -1,8 +1,12 @@
-import { useState } from 'react'
+import { useState, useEffect} from 'react'
 import { Link } from 'react-router'
-import { sampleOrders } from './sampleOrders.js'
 import './Orders.css'
 
+// const response = await fetch(
+//   'https://localhost:7041/api/customers', 
+//   {signal: controller.signal})
+
+  
 const statuses = [
   'All',
   'Pending',
@@ -17,14 +21,66 @@ const currencyFormatter = new Intl.NumberFormat('en-ZA', {
   currency: 'ZAR',
 })
 
+
+
 export default function Orders() {
   const [selectedStatus, setSelectedStatus] = useState('All')
+  const[orders, setOrders] = useState([])
+  const[isLoading, setIsLoading] = useState(true)
+  const[loadError, setLoadError] = useState('')
 
-  const matchingOrders = sampleOrders.filter(
+useEffect(() =>{
+  const controller = new AbortController()
+
+  async function loadOrders(){
+    try {
+      const response = await fetch (
+        '/api/customers',{signal:controller.signal})
+
+      if (!response.ok) {
+          throw new Error(`Order request failed (${response.status})`)
+        }
+      const data = await response.json()
+      if (controller.signal.aborted) return
+
+      setOrders(data)
+    }
+    catch (error) {
+      if (controller.signal.aborted) return
+      console.error(error)
+      setLoadError('Orders Could Not Be Loaded. Refresh to try Again')
+    } finally {
+      if (!controller.signal.aborted) setIsLoading(false)
+    }
+  }
+  loadOrders()
+  return() => controller.abort()
+}, [])
+
+
+  const matchingOrders = orders.filter(
     (order) =>
       selectedStatus === 'All' ||
       order.status === selectedStatus
   )
+
+  if (isLoading) {
+    return(
+      <main>
+        <h1>Orders</h1>
+        <p role="status">Loading orders...</p>
+      </main>
+    )
+  }
+
+  if(loadError){
+    return(
+      <main>
+        <h1>Orders</h1>
+        <p role="alert">{loadError}</p>
+      </main>
+    )
+  }
 
   return (
     <main>

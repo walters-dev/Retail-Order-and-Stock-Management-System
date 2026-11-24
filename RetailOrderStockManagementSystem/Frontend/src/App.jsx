@@ -2,6 +2,7 @@ import { Link, Navigate, NavLink, Route, Routes } from 'react-router'
 import Customers from './pages/Customers.jsx'
 import Orders from './pages/Orders.jsx'
 import OrderDetails from './pages/OrderDetails.jsx'
+import { useState } from 'react'
 import './App.css'
 
 export default function App() {
@@ -32,7 +33,7 @@ export default function App() {
             element={<OrderDetails />}/>
           <Route path="/orders" element={<Orders />} />
           <Route
-            path exact ="/"
+            path ="/"
             element={<Navigate to="/customers" replace />}
           />
 
