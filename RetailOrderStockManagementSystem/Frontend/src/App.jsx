@@ -1,8 +1,11 @@
-import { Link, Navigate, NavLink, Route, Routes } from 'react-router'
-import Customers from './pages/Customers.jsx'
-import Orders from './pages/Orders.jsx'
-import OrderDetails from './pages/OrderDetails.jsx'
-import './App.css'
+import { Link, Navigate, NavLink, Route, Routes } from 'react-router';
+import Customers from './pages/Customers.jsx';
+import Orders from './pages/Orders.jsx';
+import OrderDetails from './pages/OrderDetails.jsx';
+import './App.css';
+import Login from './pages/Login.jsx';
+import Reports  from './pages/Reports.jsx';
+import { AuthProvider } from './auth/authContext.jsx';
 
 export default function App() {
   return (
@@ -22,23 +25,37 @@ export default function App() {
           <NavLink to="/orders" className="sidebar-link">
             Orders
           </NavLink>
+          <NavLink to="/reports" className="sidebar-link">
+            Reports
+          </NavLink>
         </nav>
       </aside>
 
       <div className="app-content">
+      <AuthProvider>
         <Routes>
           <Route
             path="/orders/:orderId"
             element={<OrderDetails />}/>
           <Route path="/orders" element={<Orders />} />
           <Route
-            path exact ="/"
+            path="/"
             element={<Navigate to="/customers" replace />}
           />
 
           <Route
             path="/customers"
             element={<Customers />}
+          />
+
+          <Route
+            path="/login"
+            element={<Login />}
+          />
+
+          <Route
+            path="/reports"
+            element={<Reports />}
           />
 
           <Route
@@ -51,6 +68,7 @@ export default function App() {
             }
           />
         </Routes>
+        </AuthProvider>
       </div>
     </div>
   )
