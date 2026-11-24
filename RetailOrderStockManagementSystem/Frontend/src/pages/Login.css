@@ -32,3 +32,9 @@ div{
 button{
     margin: 2px;
 }
+html{
+    background-color: rgba(238, 3, 3, 1);
+}
+section{
+    background-color: rgba(238, 3, 3, 1);
+}

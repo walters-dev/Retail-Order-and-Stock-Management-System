@@ -21,6 +21,7 @@ namespace RetailOrderStockManagementSystem.Backend.Mapper
             CreateMap<Order, OrderResponseStaffDto>().ReverseMap();
             CreateMap<User, CreateUserRequestDto>().ReverseMap();
             CreateMap<User, LogInRequestDto>().ReverseMap();
+            //CreateMap<List<OrderResponseAdminDto>, List<Order>>().ReverseMap();
         }
     }
 }

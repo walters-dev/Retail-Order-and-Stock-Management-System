@@ -1,19 +1,32 @@
 import { useState } from 'react'
 import './Login.css'
+import {UserTypes} from'../types/User.js'
+import {useAuth} from '../auth/authContext.jsx'
+//import './Register.jsx'
+
+
+
 
 function Login(){
 // function TextInput() {
 //    const [text, setText] = useState('');   
 //};
+const {login} = useAuth();
 const [userName, setUserName] = useState('');
 const [password, setPassword] = useState('');
+
+const handleSubmit = (event) => {
+        event?.preventDefault();
+        login({userName, password});
+    }
     return(
+        // <section>
         <div>
         {/* <section id= "center"> 
             <h1>Login</h1>
         </section> */}
 
-        <form id ="login">
+        <form id ="login" onSubmit={handleSubmit}> 
             <h1>Login</h1>
             <input
                 type ="text"
@@ -21,8 +34,9 @@ const [password, setPassword] = useState('');
                 name="userName"
                 placeholder="Enter Username"
                 value={userName}
-                onChange={c => setUserName(c.target.value)}
-                maxLength="20"/>
+                onChange={c => setUserName(c.target.value)}//refreshes the value inputted
+                maxLength="20"
+                required/>
             
             <input
                 type ="password"
@@ -31,11 +45,16 @@ const [password, setPassword] = useState('');
                 placeholder="Enter Password"
                 value={password}
                 onChange={c => setPassword(c.target.value)}
-                maxLength="30"/>
-            <button>Login</button>
+                maxLength="30"
+                required/>
+            <button type="submit" href={'./Register.jsx'}>Login</button>
+            
             <button>Password reset</button>
-        </form>
+         </form> 
         </div>
+        // </section>
     )
+    
+    
 }
 export default Login;
