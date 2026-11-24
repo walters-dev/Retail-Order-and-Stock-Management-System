@@ -1,5 +1,6 @@
 import { useState, useContext, createContext } from 'react'
 import {router} from '../App'
+import { useNavigate } from 'react-router';
 //import { defineConfig } from '../../vite.config'
 
 const AuthContext = createContext();
@@ -9,7 +10,7 @@ const ROLE_KEY = "role;"
 export const AuthProvider = ({children}) => {
     const [role, setRole] = useState(JSON.parse(localStorage.getItem(ROLE_KEY), "{}"));
     const [token, setToken] = useState(localStorage.getItem(TOKEN_KEY) || "");
-
+    const navigation = useNavigate();
     const loginAttempt = async (data) => {
         try {
             const response = await fetch('/api/Auth/Login', {
@@ -26,7 +27,8 @@ export const AuthProvider = ({children}) => {
                 setRole(result.role);
                 localStorage.setItem(TOKEN_KEY, token);
                 localStorage.setItem(ROLE_KEY, JSON.stringify(role));
-                router.navigate('/');//goes to index
+                //router.navigate('/',{replace: true});//goes to index
+                navigation('/');
                 //window.location.reload();
             }
             console.log(result);
