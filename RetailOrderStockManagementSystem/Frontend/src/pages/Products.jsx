@@ -1,16 +1,19 @@
 import { useMemo, useState } from "react";
+import "./Products.css";
 
-const LOW_STOCK_THRESHOLD = 5;
+const LOW_STOCK_THRESHOLD = 50;
 
 function normalizeProduct(raw, index) {
+  const safeRaw = raw && typeof raw === "object" ? raw : {};
+
   return {
-    productId: raw.productId ?? raw.id ?? index + 1,
-    sku: raw.sku ?? raw.SKU ?? "",
-    name: raw.name ?? raw.productName ?? "",
-    category: raw.category ?? "General",
-    unitPrice: Number(raw.unitPrice ?? raw.price ?? 0),
-    stockQuantity: Number(raw.stockQuantity ?? raw.stock ?? 0),
-    isActive: Boolean(raw.isActive ?? raw.active ?? true),
+    productId: safeRaw.productId ?? safeRaw.id ?? index + 1,
+    sku: String(safeRaw.sku ?? safeRaw.SKU ?? ""),
+    name: String(safeRaw.name ?? safeRaw.productName ?? ""),
+    category: String(safeRaw.category ?? "General"),
+    unitPrice: Number(safeRaw.unitPrice ?? safeRaw.price ?? 0),
+    stockQuantity: Number(safeRaw.stockQuantity ?? safeRaw.stock ?? 0),
+    isActive: Boolean(safeRaw.isActive ?? safeRaw.active ?? true),
   };
 }
 
@@ -19,24 +22,25 @@ export default function Products({
   loading = false,
   error = "",
   onRefresh,
-  onEditProduct,
-  onCreateOrder,
 }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("ALL");
 
+  // Step A: Normalize every product item once per change to `products`
   const normalizedProducts = useMemo(
     () => products.map((item, idx) => normalizeProduct(item, idx)),
     [products]
   );
 
+  // Step B: Build a sorted list of unique categories for the dropdown
   const categories = useMemo(() => {
     const unique = new Set(
-      normalizedProducts.map((p) => p.category).filter(Boolean)
+      normalizedProducts.map((product) => product.category).filter(Boolean)
     );
     return [...unique].sort((a, b) => a.localeCompare(b));
   }, [normalizedProducts]);
 
+  // Step C: Filter by selected category and search text (SKU or product name)
   const filteredProducts = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
 
@@ -53,44 +57,39 @@ export default function Products({
     });
   }, [normalizedProducts, searchTerm, selectedCategory]);
 
+  // Summary counts for the subtitle
   const activeCount = normalizedProducts.filter((p) => p.isActive).length;
   const lowStockCount = normalizedProducts.filter(
     (p) => p.isActive && p.stockQuantity <= LOW_STOCK_THRESHOLD
   ).length;
 
   return (
-    <section className="panel">
-      <div className="panel-top">
+    <section className="products-screen" aria-label="Products">
+      <div className="products-header">
         <div>
-          <h2>Products</h2>
-          <p className="subtitle">
-            Active products and current stock ({activeCount} active • {lowStockCount} low stock).[cite: 1, 2]
+          <h2 className="products-title">Products</h2>
+          <p className="products-subtitle">
+            Active products and current stock ({activeCount} active &bull;{" "}
+            {lowStockCount} low stock)
           </p>
         </div>
 
-        <div className="action-row">
-          {onRefresh && (
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={onRefresh}
-              disabled={loading}
-            >
-              {loading ? "Refreshing..." : "Refresh"}
-            </button>
-          )}
-          {onCreateOrder && (
-            <button type="button" className="btn-primary" onClick={onCreateOrder}>
-              + Create Order
-            </button>
-          )}
-        </div>
+        {onRefresh && (
+          <button
+            type="button"
+            className="products-refresh-btn"
+            onClick={onRefresh}
+            disabled={loading}
+          >
+            {loading ? "Refreshing..." : "Refresh"}
+          </button>
+        )}
       </div>
 
-      <div className="toolbar">
+      <div className="products-toolbar">
         <input
           type="search"
-          className="search-input"
+          className="products-search-input"
           placeholder="Search by SKU or name"
           aria-label="Search by SKU or name"
           value={searchTerm}
@@ -98,7 +97,7 @@ export default function Products({
         />
 
         <select
-          className="select-input"
+          className="products-category-select"
           aria-label="Filter by category"
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
@@ -112,17 +111,19 @@ export default function Products({
         </select>
       </div>
 
-      {loading && <p className="muted">Loading products...</p>}
+      {loading && (
+        <p className="products-status-message">Loading products...</p>
+      )}
 
       {!loading && error && (
-        <div className="error-banner" role="alert">
+        <div className="products-error-banner" role="alert">
           {error}
         </div>
       )}
 
       {!loading && !error && (
-        <div className="table-card">
-          <table>
+        <div className="products-table-wrapper">
+          <table className="products-table">
             <thead>
               <tr>
                 <th>SKU</th>
@@ -131,49 +132,45 @@ export default function Products({
                 <th>Price</th>
                 <th>Stock</th>
                 <th>Status</th>
-                {onEditProduct && <th>Action</th>}
               </tr>
             </thead>
             <tbody>
               {filteredProducts.length === 0 ? (
                 <tr>
-                  <td colSpan={onEditProduct ? 7 : 6} className="muted center-cell">
+                  <td colSpan={6} className="products-empty-cell">
                     No products match your search or category filter.
                   </td>
                 </tr>
               ) : (
                 filteredProducts.map((product) => {
                   const isLowStock = product.stockQuantity <= LOW_STOCK_THRESHOLD;
+                  const safePrice = Number.isFinite(product.unitPrice)
+                    ? product.unitPrice
+                    : 0;
+                  const safeStock = Number.isFinite(product.stockQuantity)
+                    ? product.stockQuantity
+                    : 0;
 
                   return (
                     <tr key={product.productId}>
-                      <td className="mono">{product.sku}</td>
+                      <td className="products-sku">{product.sku}</td>
                       <td>{product.name}</td>
                       <td>{product.category}</td>
-                      <td>R{product.unitPrice.toFixed(2)}</td>
-                      <td className={isLowStock ? "low-stock-text" : ""}>
-                        {product.stockQuantity}
+                      <td>R{safePrice.toFixed(2)}</td>
+                      <td className={isLowStock ? "products-stock-low" : ""}>
+                        {safeStock}
                       </td>
                       <td>
                         <span
-                          className={`status-pill ${
-                            product.isActive ? "status-active" : "status-inactive"
+                          className={`products-badge ${
+                            product.isActive
+                              ? "products-badge-active"
+                              : "products-badge-inactive"
                           }`}
                         >
                           {product.isActive ? "Active" : "Inactive"}
                         </span>
                       </td>
-                      {onEditProduct && (
-                        <td>
-                          <button
-                            type="button"
-                            className="btn-link"
-                            onClick={() => onEditProduct(product)}
-                          >
-                            Edit
-                          </button>
-                        </td>
-                      )}
                     </tr>
                   );
                 })
@@ -183,9 +180,10 @@ export default function Products({
         </div>
       )}
 
-      <p className="footnote">
-        <span className="low-stock-text">Red stock = low stock</span> (≤ {LOW_STOCK_THRESHOLD} units).
-        Inactive products remain stored for historical reference but cannot be added to new quotes or orders.[cite: 1, 2]
+      <p className="products-footnote">
+        <span className="products-footnote-low">Red stock = low stock</span>{" "}
+        (at or below {LOW_STOCK_THRESHOLD} units). View only: product changes are
+        made by Manager/Admin.
       </p>
     </section>
   );

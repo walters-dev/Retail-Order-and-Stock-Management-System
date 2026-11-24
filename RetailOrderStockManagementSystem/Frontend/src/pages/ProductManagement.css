@@ -1,0 +1,274 @@
+.product-management {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.product-management-header,
+.product-management-inventory-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.product-management-header,
+.product-management-form,
+.product-management-inventory {
+  padding: 1.25rem 1.5rem;
+  background: #ffffff;
+  border: 1px solid #d9e1ec;
+  border-radius: 10px;
+}
+
+.product-management-title {
+  margin: 0;
+  font-size: 1.35rem;
+  color: #0f172a;
+}
+
+.product-management-subtitle,
+.product-management-inventory-header p {
+  margin: 0.3rem 0 0;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.product-management-secondary-button,
+.product-management-primary-button,
+.product-management-edit-button {
+  border-radius: 6px;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.product-management-secondary-button {
+  padding: 0.55rem 0.85rem;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+}
+
+.product-management-secondary-button:hover:not(:disabled) {
+  background: #f8fafc;
+}
+
+.product-management-primary-button {
+  padding: 0.6rem 1rem;
+  border: 1px solid #2563eb;
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.product-management-primary-button:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.product-management-secondary-button:disabled,
+.product-management-primary-button:disabled,
+.product-management-edit-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.product-management-form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.product-management-form-header h2,
+.product-management-inventory-header h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #0f172a;
+}
+
+.product-management-form-header span {
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.product-management-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.product-management-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.product-management-field label,
+.product-management-active-field {
+  color: #334155;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.product-management-field input {
+  width: 100%;
+  min-width: 0;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #0f172a;
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.product-management-field input:focus {
+  outline: 2px solid #93c5fd;
+  outline-offset: 1px;
+  border-color: #2563eb;
+}
+
+.product-management-active-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  align-self: end;
+  min-height: 2.4rem;
+}
+
+.product-management-active-field input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: #2563eb;
+}
+
+.product-management-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.product-management-message {
+  padding: 0.7rem 0.9rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.product-management-error {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.product-management-success {
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.product-management-inventory-header {
+  margin-bottom: 1rem;
+}
+
+.product-management-table-wrapper {
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.product-management-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.product-management-table th,
+.product-management-table td {
+  padding: 0.7rem 0.8rem;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.product-management-table th {
+  background: #f8fafc;
+  color: #475569;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.product-management-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.product-management-sku {
+  color: #334155;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.product-management-status {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.product-management-status.is-active {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.product-management-status.is-inactive {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.product-management-edit-button {
+  padding: 0.35rem 0.6rem;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #1d4ed8;
+}
+
+.product-management-edit-button:hover:not(:disabled) {
+  background: #eff6ff;
+}
+
+.product-management-empty {
+  padding: 1.5rem !important;
+  color: #64748b;
+  text-align: center !important;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+@media (max-width: 640px) {
+  .product-management-header,
+  .product-management-form,
+  .product-management-inventory {
+    padding: 1rem;
+  }
+
+  .product-management-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .product-management-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

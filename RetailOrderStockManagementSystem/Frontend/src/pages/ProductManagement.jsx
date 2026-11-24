@@ -1,93 +1,88 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { createProduct, updateProduct } from "../services/api";
+import "./ProductManagement.css";
 
 const EMPTY_FORM = {
   sku: "",
-  category: "Accessories",
   name: "",
+  category: "",
   unitPrice: "",
   stockQuantity: "0",
   isActive: true,
 };
 
-export default function ProductManagement({
-  products = [],
-  selectedProduct = null,
-  onClearSelectedProduct,
-  onSaved,
-  onCancel,
-}) {
+function getProductId(product) {
+  return product.productId ?? product.id;
+}
+
+function toForm(product) {
+  return {
+    sku: String(product.sku ?? ""),
+    name: String(product.name ?? product.productName ?? ""),
+    category: String(product.category ?? ""),
+    unitPrice: String(product.unitPrice ?? product.price ?? ""),
+    stockQuantity: String(product.stockQuantity ?? product.stock ?? 0),
+    isActive: Boolean(product.isActive ?? product.active ?? true),
+  };
+}
+
+export default function ProductManagement({ products = [], onSaved }) {
   const [form, setForm] = useState(EMPTY_FORM);
+  const [editingId, setEditingId] = useState(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  useEffect(() => {
-    setError("");
-    setSuccessMessage("");
-
-    if (selectedProduct) {
-      setForm({
-        sku: selectedProduct.sku ?? "",
-        category: selectedProduct.category ?? "General",
-        name: selectedProduct.name ?? "",
-        unitPrice: String(selectedProduct.unitPrice ?? selectedProduct.price ?? ""),
-        stockQuantity: String(
-          selectedProduct.stockQuantity ?? selectedProduct.stock ?? 0
-        ),
-        isActive: Boolean(selectedProduct.isActive ?? true),
-      });
-    } else {
-      setForm(EMPTY_FORM);
-    }
-  }, [selectedProduct]);
+  const isEditMode = editingId !== null;
 
   function handleChange(field, value) {
-    setForm((prev) => ({ ...prev, [field]: value }));
+    setForm((current) => ({ ...current, [field]: value }));
     setError("");
     setSuccessMessage("");
   }
 
-  function handleNewMode() {
+  function handleNewProduct() {
+    setEditingId(null);
+    setForm(EMPTY_FORM);
     setError("");
     setSuccessMessage("");
-    setForm(EMPTY_FORM);
-    if (onClearSelectedProduct) onClearSelectedProduct();
+  }
+
+  function handleEditProduct(product) {
+    setEditingId(getProductId(product));
+    setForm(toForm(product));
+    setError("");
+    setSuccessMessage("");
   }
 
   function validateForm() {
-    const trimmedSku = form.sku.trim();
-    const trimmedName = form.name.trim();
-    const price = Number(form.unitPrice);
-    const stock = Number(form.stockQuantity);
+    const sku = form.sku.trim();
+    const name = form.name.trim();
+    const unitPrice = Number(form.unitPrice);
+    const stockQuantity = Number(form.stockQuantity);
 
-    if (!trimmedSku) return "SKU is required.";
-    if (!/^[A-Za-z]{3}[0-9]{3}[A-Za-z]{2}$/.test(trimmedSku)) {
-      return "SKU must contain 3 letters, 3 digits, and 2 letters (e.g. ABC123XY).";
+    if (!sku) return "SKU is required.";
+    if (!name) return "Product name is required.";
+    if (!Number.isFinite(unitPrice) || unitPrice < 0.01) {
+      return "Unit price must be at least R0.01.";
     }
-    if (!trimmedName) return "Product name is required.";
-    if (!Number.isFinite(price) || price <= 0) {
-      return "Unit price must be greater than R0.00.";
-    }
-    if (!Number.isInteger(stock) || stock < 0) {
-      return "Stock quantity cannot be negative and must be a whole number.";
+    if (!Number.isInteger(stockQuantity) || stockQuantity < 0) {
+      return "Stock quantity must be a whole number of zero or more.";
     }
 
-    const currentId = selectedProduct?.productId ?? selectedProduct?.id ?? null;
     const duplicateSku = products.some(
-      (p) =>
-        (p.productId ?? p.id) !== currentId &&
-        (p.sku ?? "").trim().toLowerCase() === trimmedSku.toLowerCase()
+      (product) =>
+        getProductId(product) !== editingId &&
+        String(product.sku ?? "").trim().toLowerCase() === sku.toLowerCase()
     );
-    if (duplicateSku) {
-      return `SKU "${trimmedSku}" is already in use. SKU must be unique.`;
-    }
+    if (duplicateSku) return `SKU "${sku}" is already in use.`;
 
     return "";
   }
 
-  async function handleSubmit(e) {
-    e.preventDefault();
+  async function handleSubmit(event) {
+    event.preventDefault();
+
     const validationError = validateForm();
     if (validationError) {
       setError(validationError);
@@ -100,7 +95,7 @@ export default function ProductManagement({
       category: form.category.trim() || "General",
       unitPrice: Number(Number(form.unitPrice).toFixed(2)),
       stockQuantity: Number(form.stockQuantity),
-      isActive: Boolean(form.isActive),
+      isActive: form.isActive,
     };
 
     setSaving(true);
@@ -108,9 +103,8 @@ export default function ProductManagement({
     setSuccessMessage("");
 
     try {
-      const editId = selectedProduct?.productId ?? selectedProduct?.id;
-      if (editId) {
-        await updateProduct(editId, payload);
+      if (isEditMode) {
+        await updateProduct(editingId, payload);
         setSuccessMessage(`Updated ${payload.sku} (${payload.name}).`);
       } else {
         await createProduct(payload);
@@ -118,153 +112,205 @@ export default function ProductManagement({
         setForm(EMPTY_FORM);
       }
 
-      if (onSaved) {
-        await onSaved();
-      }
-    } catch (err) {
-      setError(err.message || "Failed to save product.");
+      await onSaved?.();
+    } catch (saveError) {
+      setError(saveError.message || "Failed to save product.");
     } finally {
       setSaving(false);
     }
   }
 
-  const isEditMode = Boolean(selectedProduct);
-
   return (
-    <section className="panel">
-      <div className="panel-top">
+    <section className="product-management" aria-label="Product management">
+      <header className="product-management-header">
         <div>
-          <h2>Product Management</h2>
-          <p className="subtitle">Add or update a product.</p>
+          <h1 className="product-management-title">Product Management</h1>
+          <p className="product-management-subtitle">
+            Add products or update existing product details and stock.
+          </p>
         </div>
-
-        <div className="action-row">
-          <button
-            type="button"
-            className="btn-secondary"
-            onClick={handleNewMode}
-            disabled={saving}
-          >
-            + New Product
-          </button>
-          {isEditMode && (
-            <span className="editing-badge">
-              Editing: {selectedProduct.sku} {selectedProduct.name}
-            </span>
-          )}
-        </div>
-      </div>
+        <button
+          type="button"
+          className="product-management-secondary-button"
+          onClick={handleNewProduct}
+          disabled={saving}
+        >
+          + New product
+        </button>
+      </header>
 
       {error && (
-        <div className="error-banner" role="alert" style={{ marginBottom: "1rem" }}>
+        <div className="product-management-message product-management-error" role="alert">
           {error}
         </div>
       )}
-
       {successMessage && (
-        <div className="success-banner" role="status" style={{ marginBottom: "1rem" }}>
+        <div className="product-management-message product-management-success" role="status">
           {successMessage}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="product-form">
-        <div className="form-grid-2">
-          <div className="form-group">
-            <label htmlFor="prod-sku">SKU *</label>
+      <form className="product-management-form" onSubmit={handleSubmit}>
+        <div className="product-management-form-header">
+          <h2>{isEditMode ? "Edit product" : "Add a product"}</h2>
+          {isEditMode && <span>Editing product ID {editingId}</span>}
+        </div>
+
+        <div className="product-management-fields">
+          <div className="product-management-field">
+            <label htmlFor="management-sku">SKU</label>
             <input
-              id="prod-sku"
-              type="text"
-              placeholder="e.g. ABC123XY"
+              id="management-sku"
+              name="sku"
+              autoComplete="off"
               value={form.sku}
-              onChange={(e) => handleChange("sku", e.target.value)}
+              onChange={(event) => handleChange("sku", event.target.value)}
+              required
             />
           </div>
-
-          <div className="form-group">
-            <label htmlFor="prod-category">Category</label>
+          <div className="product-management-field">
+            <label htmlFor="management-name">Product name</label>
             <input
-              id="prod-category"
-              type="text"
-              placeholder="e.g. Accessories"
+              id="management-name"
+              name="name"
+              value={form.name}
+              onChange={(event) => handleChange("name", event.target.value)}
+              required
+            />
+          </div>
+          <div className="product-management-field">
+            <label htmlFor="management-category">Category</label>
+            <input
+              id="management-category"
+              name="category"
               value={form.category}
-              onChange={(e) => handleChange("category", e.target.value)}
+              onChange={(event) => handleChange("category", event.target.value)}
             />
           </div>
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="prod-name">Product name *</label>
-          <input
-            id="prod-name"
-            type="text"
-            placeholder="e.g. Mechanical Keyboard"
-            value={form.name}
-            onChange={(e) => handleChange("name", e.target.value)}
-          />
-        </div>
-
-        <div className="form-grid-2">
-          <div className="form-group">
-            <label htmlFor="prod-price">Unit price (R) *</label>
+          <div className="product-management-field">
+            <label htmlFor="management-price">Unit price (R)</label>
             <input
-              id="prod-price"
+              id="management-price"
+              name="unitPrice"
               type="number"
-              step="0.01"
               min="0.01"
-              placeholder="0.00"
+              step="0.01"
               value={form.unitPrice}
-              onChange={(e) => handleChange("unitPrice", e.target.value)}
+              onChange={(event) => handleChange("unitPrice", event.target.value)}
+              required
             />
           </div>
-
-          <div className="form-group">
-            <label htmlFor="prod-stock">Stock quantity *</label>
+          <div className="product-management-field">
+            <label htmlFor="management-stock">Stock quantity</label>
             <input
-              id="prod-stock"
+              id="management-stock"
+              name="stockQuantity"
               type="number"
-              step="1"
               min="0"
+              step="1"
               value={form.stockQuantity}
-              onChange={(e) => handleChange("stockQuantity", e.target.value)}
+              onChange={(event) => handleChange("stockQuantity", event.target.value)}
+              required
             />
           </div>
-        </div>
-
-        <div className="toggle-row">
-          <label className="checkbox-inline" htmlFor="prod-active">
+          <label className="product-management-active-field" htmlFor="management-active">
             <input
-              id="prod-active"
+              id="management-active"
+              name="isActive"
               type="checkbox"
               checked={form.isActive}
-              onChange={(e) => handleChange("isActive", e.target.checked)}
+              onChange={(event) => handleChange("isActive", event.target.checked)}
             />
-            <span>Active</span>
+            Active product
           </label>
-          <span className="muted">
-            Inactive products stay stored but can&apos;t be ordered.
-          </span>
         </div>
 
-        <p className="footnote" style={{ marginTop: 0 }}>
-          SKU must be unique. Price must be above R0. Stock cannot be negative.
-        </p>
-
-        <div className="form-actions-right">
-          {onCancel && (
+        <div className="product-management-form-actions">
+          {isEditMode && (
             <button
               type="button"
-              className="btn-secondary"
-              onClick={onCancel}
+              className="product-management-secondary-button"
+              onClick={handleNewProduct}
               disabled={saving}
             >
-              Cancel
+              Cancel edit
             </button>
           )}
-          <button type="submit" className="btn-primary" disabled={saving}>
-            {saving ? "Saving..." : isEditMode ? "Update Product" : "Save Product"}
+          <button type="submit" className="product-management-primary-button" disabled={saving}>
+            {saving ? "Saving..." : isEditMode ? "Save changes" : "Add product"}
           </button>
         </div>
       </form>
+
+      <section className="product-management-inventory" aria-labelledby="inventory-title">
+        <div className="product-management-inventory-header">
+          <div>
+            <h2 id="inventory-title">Inventory</h2>
+            <p>{products.length} products</p>
+          </div>
+        </div>
+        <div className="product-management-table-wrapper">
+          <table className="product-management-table">
+            <thead>
+              <tr>
+                <th scope="col">SKU</th>
+                <th scope="col">Product</th>
+                <th scope="col">Category</th>
+                <th scope="col">Unit price</th>
+                <th scope="col">Stock</th>
+                <th scope="col">Status</th>
+                <th scope="col"><span className="visually-hidden">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              {products.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="product-management-empty">
+                    No products available.
+                  </td>
+                </tr>
+              ) : (
+                products.map((product, index) => {
+                  const productId = getProductId(product);
+                  const isActive = Boolean(product.isActive ?? product.active ?? true);
+                  const price = Number(product.unitPrice ?? product.price ?? 0);
+                  const stock = Number(product.stockQuantity ?? product.stock ?? 0);
+
+                  return (
+                    <tr key={productId ?? product.sku ?? index}>
+                      <td className="product-management-sku">{product.sku}</td>
+                      <td>{product.name ?? product.productName}</td>
+                      <td>{product.category || "General"}</td>
+                      <td>R{Number.isFinite(price) ? price.toFixed(2) : "0.00"}</td>
+                      <td>{Number.isFinite(stock) ? stock : 0}</td>
+                      <td>
+                        <span
+                          className={`product-management-status ${
+                            isActive ? "is-active" : "is-inactive"
+                          }`}
+                        >
+                          {isActive ? "Active" : "Inactive"}
+                        </span>
+                      </td>
+                      <td>
+                        <button
+                          type="button"
+                          className="product-management-edit-button"
+                          onClick={() => handleEditProduct(product)}
+                          disabled={saving}
+                          aria-label={`Edit ${product.name ?? product.productName}`}
+                        >
+                          Edit
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </section>
   );
 }
