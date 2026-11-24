@@ -24,7 +24,7 @@ const salesSummary = async (data) => {
 }
 
 
-function Reports(){
+export default function Reports(){
     return(
         <>
 

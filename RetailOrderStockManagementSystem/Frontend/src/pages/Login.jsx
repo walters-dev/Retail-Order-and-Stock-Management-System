@@ -11,13 +11,13 @@ function Login(){
 // function TextInput() {
 //    const [text, setText] = useState('');   
 //};
-const {login} = useAuth();
+const {loginAttempt} = useAuth();
 const [userName, setUserName] = useState('');
 const [password, setPassword] = useState('');
 
 const handleSubmit = (event) => {
         event?.preventDefault();
-        login({userName, password});
+         loginAttempt({userName, password});
     }
     return(
         // <section>
@@ -26,7 +26,7 @@ const handleSubmit = (event) => {
             <h1>Login</h1>
         </section> */}
 
-        <form id ="login" onSubmit={handleSubmit}> 
+        <form onSubmit={handleSubmit}> 
             <h1>Login</h1>
             <input
                 type ="text"
@@ -47,7 +47,7 @@ const handleSubmit = (event) => {
                 onChange={c => setPassword(c.target.value)}
                 maxLength="30"
                 required/>
-            <button type="submit" href={'./Register.jsx'}>Login</button>
+            <button type="submit">Login</button>
             
             <button>Password reset</button>
          </form> 
