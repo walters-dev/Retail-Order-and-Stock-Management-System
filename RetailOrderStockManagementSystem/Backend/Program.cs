@@ -31,6 +31,7 @@ builder.Services.AddScoped<JwtTokenGenerator>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.AddScoped<IReportService, ReportService>();
 //swagger api
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

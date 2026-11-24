@@ -1,8 +1,11 @@
-import { Link, Navigate, NavLink, Route, Routes } from 'react-router'
-import Customers from './pages/Customers.jsx'
-import Orders from './pages/Orders.jsx'
-import OrderDetails from './pages/OrderDetails.jsx'
-import './App.css'
+import { createBrowserRouter, Link, Navigate, NavLink, Route, Routes } from 'react-router';
+import Customers from './pages/Customers.jsx';
+import Orders from './pages/Orders.jsx';
+import OrderDetails from './pages/OrderDetails.jsx';
+import './App.css';
+import Login from './pages/Login.jsx';
+import Reports from './pages/Reports.jsx';
+import { AuthProvider } from './auth/authContext.jsx';
 
 export default function App() {
   return (
@@ -22,36 +25,81 @@ export default function App() {
           <NavLink to="/orders" className="sidebar-link">
             Orders
           </NavLink>
+          <NavLink to="/reports" className="sidebar-link">
+            Reports
+          </NavLink>
         </nav>
       </aside>
 
       <div className="app-content">
-        <Routes>
-          <Route
-            path="/orders/:orderId"
-            element={<OrderDetails />}/>
-          <Route path="/orders" element={<Orders />} />
-          <Route
-            path exact ="/"
-            element={<Navigate to="/customers" replace />}
-          />
+        <AuthProvider>
+          <Routes>
+            <Route
+              path="/orders/:orderId"
+              element={<OrderDetails />} />
+            <Route path="/orders" element={<Orders />} />
+            <Route
+              path="/"
+              element={<Navigate to="/customers" replace />}
+            />
 
-          <Route
-            path="/customers"
-            element={<Customers />}
-          />
+            <Route
+              path="/customers"
+              element={<Customers />}
+            />
 
-          <Route
-            path="*"
-            element={
-              <main>
-                <h1>Page not found</h1>
-                <Link to="/customers">Go to Customers</Link>
-              </main>
-            }
-          />
-        </Routes>
+            <Route
+              path="/login"
+              element={<Login />}
+            />
+
+            <Route
+              path="/reports"
+              element={<Reports />}
+            />
+
+            <Route
+              path="*"
+              element={
+                <main>
+                  <h1>Page not found</h1>
+                  <Link to="/customers">Go to Customers</Link>
+                </main>
+              }
+            />
+          </Routes>
+        </AuthProvider>
       </div>
     </div>
   )
 }
+export const router = createBrowserRouter([
+  {
+    path : "/",
+    element: <Navigate to="/customers" replace />
+  },
+  {
+    path: "/orders/:orderId",
+    element: <OrderDetails />
+  },
+  {
+    path: "/customers",
+    element: <Customers />
+  },
+  {
+    path: "/login",
+    element: <Login />
+  },
+  {
+    path: "/reports",
+    element: <Reports />
+  },
+  {
+    path: "*",
+    element:
+      <main>
+        <h1>Page not found</h1>
+        <Link to="/customers">Go to Customers</Link>
+      </main>
+  }
+])
