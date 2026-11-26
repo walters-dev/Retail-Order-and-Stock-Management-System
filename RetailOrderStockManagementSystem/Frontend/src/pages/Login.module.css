@@ -1,4 +1,4 @@
-form{
+.loginform{
     /* justify-content: center; */
     /* align-items: center; */
     /* justify-content: center; */
@@ -12,15 +12,15 @@ form{
     padding: 40px;
     border-radius: 25px;
 }
-input{
+.userinput{
     margin: 12px;
     padding: 4px;
 }
-h1{
+.title{
     color: rgb(1, 0, 0);
 }
-div{
-    background-color: rgba(238, 3, 3, 1);
+.loginlayout{
+    /* background-color: rgba(238, 3, 3, 1); */
     /* display: flex; */
     margin: auto;
     /* padding: 100px; */
@@ -29,12 +29,7 @@ div{
     /* width: 100vw;
   min-height: 100vh; */
 }
-button{
+.button{
     margin: 2px;
 }
-html{
-    background-color: rgba(238, 3, 3, 1);
-}
-section{
-    background-color: rgba(238, 3, 3, 1);
-}
+

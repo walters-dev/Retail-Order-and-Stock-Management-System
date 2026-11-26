@@ -1,0 +1,64 @@
+.loginform{
+    display: grid;
+    gap: 16px;
+}
+.editor{
+min-width: 0;
+  padding: 24px;
+  background-color: white;
+  border: 1px solid #dbe3ee;
+  border-radius: 12px;
+  flex: 1 1 280px;
+  min-width: 0;
+  padding: 24px;
+  border: 1px solid #dbe3ee;
+  border-radius: 12px;
+  background-color: white;
+}
+.layout{
+    display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.userinput{
+    width: 300px;
+  max-width: 100%;
+  margin-right: 12px;
+  margin-bottom: 20px;
+}
+
+.buttons{
+padding: 8px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background-color: white;
+  color: black;
+  font-weight: 600;
+  width: 100%;
+    margin-bottom: 20px;
+    
+}
+
+.buttons:hover:enabled{
+  background-color: #f1f5f9;
+}
+.buttons button:disabled {
+  opacity: 0.6;
+}
+.buttons[aria-pressed="true"] {
+  border-color: black;
+  background-color: black;
+  color: white;
+}
+.buttons:focus-visible {
+  outline: 2px solid black;
+  outline-offset: 3px;
+}
+.buttonlayout{
+    display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+}

@@ -112,7 +112,7 @@ namespace RetailOrderStockManagementSystem.Backend.Controllers
             return Ok(new
             {
                 token,
-                expiresInSeconds = 3600,
+                expiresInSeconds = 216000,
                 role = user.Type
             });
         }

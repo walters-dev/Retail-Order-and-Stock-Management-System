@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import './Login.css'
+import styles from './Login.module.css'
 import {UserTypes} from'../types/User.js'
 import {useAuth} from '../auth/authContext.jsx'
 //import './Register.jsx'
@@ -14,20 +14,20 @@ function Login(){
 const {loginAttempt} = useAuth();
 const [userName, setUserName] = useState('');
 const [password, setPassword] = useState('');
-
+//logout();
 const handleSubmit = (event) => {
         event?.preventDefault();
          loginAttempt({userName, password});
     }
     return(
         // <section>
-        <div>
+        <div className={styles.loginlayout}>
         {/* <section id= "center"> 
             <h1>Login</h1>
         </section> */}
 
-        <form onSubmit={handleSubmit}> 
-            <h1>Login</h1>
+        <form onSubmit={handleSubmit} className={styles.loginform}> 
+            <h1 className={styles.title}>Login</h1>
             <input
                 type ="text"
                 id="userName"
@@ -36,7 +36,8 @@ const handleSubmit = (event) => {
                 value={userName}
                 onChange={c => setUserName(c.target.value)}//refreshes the value inputted
                 maxLength="20"
-                required/>
+                required
+                className={styles.userinput}/>
             
             <input
                 type ="password"
@@ -46,10 +47,11 @@ const handleSubmit = (event) => {
                 value={password}
                 onChange={c => setPassword(c.target.value)}
                 maxLength="30"
+                className={styles.userinput}
                 required/>
-            <button type="submit">Login</button>
+            <button type="submit" className={styles.buttons}>Login</button>
             
-            <button>Password reset</button>
+            <button className={styles.buttons}>Password reset</button>
          </form> 
         </div>
         // </section>

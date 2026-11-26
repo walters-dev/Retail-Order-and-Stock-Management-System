@@ -7,8 +7,9 @@ const blankCustomer = {
   email: '',
   isActive: true,
 }
-
+const TOKEN_KEY = "token";
 export default function Customers ()  {
+  const [token, setToken] = useState(localStorage.getItem(TOKEN_KEY) || "");
   const [customers, setCustomers] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
@@ -31,7 +32,12 @@ export default function Customers ()  {
       try {
         const response = await fetch(
           '/api/customers',
-          { signal: controller.signal }
+          { signal: controller.signal,
+            headers:{
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+           }
         )
 
         if (!response.ok) {

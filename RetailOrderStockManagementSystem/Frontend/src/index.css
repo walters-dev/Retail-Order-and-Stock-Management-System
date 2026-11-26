@@ -39,3 +39,6 @@ button {
 button:disabled {
   cursor: not-allowed;
 }
+div{
+  margin: auto;
+}

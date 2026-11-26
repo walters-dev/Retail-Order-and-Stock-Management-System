@@ -1,0 +1,25 @@
+.TotalSales{
+    border: 12px solid;
+    border-color: aquamarine;
+    border-radius: 15px;
+    background-color: white;
+    
+}
+.CompletedOrders{
+    border: 12px solid;
+    border-color: aquamarine;
+    border-radius: 10px;
+    background-color: white;
+}
+.LowStockProducts{
+    border: 8px solid;
+    border-color: aquamarine;
+    border-radius: 15px;
+    background-color: white;
+    margin: auto;
+    width: 85%;
+}
+.Summary{
+    display: flex;
+    background-color: white;
+}
