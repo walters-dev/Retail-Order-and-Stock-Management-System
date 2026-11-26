@@ -1,4 +1,5 @@
-﻿using k8s.Models;
+﻿//using k8s.Models;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +12,7 @@ namespace RetailOrderStockManagementSystem.Backend.Controllers
 {
     [ApiController]
     [Route("api/customers")]
-    [Authorize(Roles = "Admin, Staff")]
+    //[Authorize(Roles = "Admin, Staff")]
     public class CustomerController : ControllerBase
     {
         private readonly ICustomerService _customerService;
@@ -87,7 +88,7 @@ namespace RetailOrderStockManagementSystem.Backend.Controllers
         [Authorize(Roles = "Admin, Staff")]
         public async Task<IActionResult> SetActive(
             Guid id,
-            [FromQuery] bool isActive = false)
+            [FromQuery, BindRequired] bool isActive )
         {
             bool updated = isActive
                 ? await _customerService.ReactivateAsync(id)

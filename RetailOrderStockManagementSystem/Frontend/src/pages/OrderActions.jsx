@@ -14,6 +14,7 @@ const actionsByStatus = {
 
 export default function OrderActions({ order, onStatusChanged, role = 'Admin' }) {
   const [isBusy, setIsBusy] = useState(false)
+  const token = localStorage.getItem('TOKEN_KEY');
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
 

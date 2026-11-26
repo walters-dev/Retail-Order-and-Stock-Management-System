@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link, useParams } from 'react-router'
+import { Link, useParams } from 'react-router-dom'
 import './Orders.css'
 import OrderActions from './OrderActions.jsx' 
 
@@ -10,6 +10,7 @@ const currencyFormatter = new Intl.NumberFormat('en-ZA', {
 
 export default function OrderDetails() {
   const { orderId } = useParams()
+  const token = localStorage.getItem('TOKEN_KEY');
   const [orders, setOrders] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState('')

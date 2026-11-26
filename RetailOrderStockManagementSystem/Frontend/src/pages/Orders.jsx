@@ -1,10 +1,9 @@
 import { useState, useEffect} from 'react'
-import { Link } from 'react-router'
+import { Link } from 'react-router-dom'
 import './Orders.css'
+const TOKEN_KEY = "token"
 
-// const response = await fetch(
-//   'https://localhost:7041/api/customers', 
-//   {signal: controller.signal})
+
 
   
 const statuses = [
@@ -24,8 +23,10 @@ const currencyFormatter = new Intl.NumberFormat('en-ZA', {
 
 
 export default function Orders() {
+  
   const [selectedStatus, setSelectedStatus] = useState('All')
   const[orders, setOrders] = useState([])
+  const [token, setToken] = useState(localStorage.getItem(TOKEN_KEY) || "");
   const[isLoading, setIsLoading] = useState(true)
   const[loadError, setLoadError] = useState('')
 
@@ -35,7 +36,14 @@ useEffect(() =>{
   async function loadOrders(){
     try {
       const response = await fetch (
-        '/api/customers',{signal:controller.signal})
+        '/api/customers',{signal:controller.signal,
+          headers :{
+              "Content-Type": "application/json",
+              'Authorization': (`Bearer ${token}`) 
+            }
+        }
+        
+      )
 
       if (!response.ok) {
           throw new Error(`Order request failed (${response.status})`)

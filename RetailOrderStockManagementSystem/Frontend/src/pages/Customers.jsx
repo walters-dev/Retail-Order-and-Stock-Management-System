@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import './Customers.css'
-
+const TOKEN_KEY = "token"
 const blankCustomer = {
   fullName: '',
   mobileNumber: '',
@@ -9,6 +9,8 @@ const blankCustomer = {
 }
 
 export default function Customers ()  {
+  const [token, setToken] = useState(localStorage.getItem(TOKEN_KEY) || "");
+ 
   const [customers, setCustomers] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
@@ -26,13 +28,22 @@ export default function Customers ()  {
   // Load customers when this component appears. Cancel the request during cleanup.
   useEffect(() => {
     const controller = new AbortController()
-
+    console.log(token);
     async function loadCustomers() {
       try {
+        setToken(localStorage.getItem(TOKEN_KEY));
         const response = await fetch(
-          '/api/customers',
-          { signal: controller.signal }
+          'http://localhost:5162/api/customers',
+          { 
+            signal: controller.signal,  
+            headers :{
+              "Content-Type": "application/json",
+              'Authorization': (`Bearer ${token}`) 
+            }
+        }
         )
+         
+        
 
         if (!response.ok) {
           throw new Error(`Customer request failed (${response.status})`)
@@ -51,7 +62,7 @@ export default function Customers ()  {
       } catch (error) {
         if (controller.signal.aborted) return
 
-        console.error(error)
+        console.log(error)
         setLoadError('Customers could not be loaded. Refresh to try again.')
       } finally {
         if (!controller.signal.aborted) {
@@ -241,6 +252,7 @@ export default function Customers ()  {
             + Add Customer
           </button>
 
+        
           <table>
             <thead>
               <tr>
