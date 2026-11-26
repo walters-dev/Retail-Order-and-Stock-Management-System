@@ -1,208 +1,75 @@
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f1f5f9;
-  color: #0f172a;
-}
-
-.app-shell {
+/* Arrange the sidebar and page beside each other. */
+.app-layout {
   display: flex;
   min-height: 100vh;
 }
 
-.sidebar {
-  width: 220px;
-  background-color: #0f172a;
-  color: #f8fafc;
-  display: flex;
-  flex-direction: column;
-  padding: 1.25rem 0.9rem;
-  flex-shrink: 0;
+/* Black sidebar, 220 pixels wide. */
+.app-sidebar {
+  flex: 0 0 220px;
+  padding: 24px 16px;
+  background-color: black;
+  color: white;
 }
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  margin-bottom: 1.5rem;
-  padding: 0 0.35rem;
-}
-
-.brand-badge {
-  width: 32px;
-  height: 32px;
-  border-radius: 7px;
-  background-color: #2563eb;
-  color: #ffffff;
+.sidebar-brand {
+  margin: 0 0 32px;
+  font-size: 20px;
   font-weight: 700;
+  line-height: 1.3;
+}
+
+.app-sidebar nav {
   display: grid;
-  place-items: center;
+  gap: 8px;
 }
 
-.brand-title,
-.brand-sub {
-  line-height: 1.2;
-}
-
-.brand-title {
-  font-size: 0.9rem;
-  font-weight: 700;
-}
-
-.brand-sub {
-  font-size: 0.75rem;
-  color: #94a3b8;
-}
-
-.nav-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  flex: 1;
-}
-
-.nav-item {
-  width: 100%;
-  text-align: left;
-  background: transparent;
-  color: #cbd5e1;
-  border: none;
+/* Navigation links. */
+.sidebar-link {
+  display: block;
+  padding: 12px 16px;
   border-radius: 6px;
-  padding: 0.6rem 0.75rem;
-  font-size: 0.9rem;
-  cursor: pointer;
-}
-
-.nav-item.active {
-  background-color: #2563eb;
-  color: #ffffff;
+  color: white;
+  text-decoration: none;
   font-weight: 600;
 }
 
-.sidebar-footer {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.8rem;
-  color: #94a3b8;
-  padding: 0.5rem 0.35rem 0;
-  border-top: 1px solid #1e293b;
+.sidebar-link:hover {
+  background-color: #333333;
 }
 
-.role-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: #22c55e;
+/* Highlight the current page. */
+.sidebar-link.active {
+  background-color: #b91c1c;
 }
 
-.main-content {
+.sidebar-link:focus-visible {
+  outline: 2px solid white;
+  outline-offset: 3px;
+}
+
+/* Let the page fill the remaining width. */
+.app-content {
   flex: 1;
   min-width: 0;
-  max-width: 1120px;
-  padding: 1.75rem 2rem;
 }
 
-.panel {
-  background: #ffffff;
-  border-radius: 10px;
-  padding: 1.5rem;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
-}
-
-.panel h1 {
-  margin: 0 0 0.25rem;
-  font-size: 1.35rem;
-}
-
-.subtitle {
-  margin: 0 0 1rem;
-  color: #64748b;
-  font-size: 0.9rem;
-}
-
-.product-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.form-group label {
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: #334155;
-}
-
-.form-group input {
-  padding: 0.55rem 0.75rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  font-size: 0.92rem;
-}
-
-.form-actions-right {
-  display: flex;
-  justify-content: flex-end;
-  padding-top: 0.5rem;
-  border-top: 1px solid #e2e8f0;
-}
-
-.btn-primary {
-  background-color: #2563eb;
-  color: #ffffff;
-  border: none;
-  border-radius: 6px;
-  padding: 0.55rem 0.95rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.btn-primary:hover {
-  background-color: #1d4ed8;
-}
-
-.btn-link {
-  background: none;
-  border: none;
-  color: #2563eb;
-  font-weight: 600;
-  font-size: 0.88rem;
-  cursor: pointer;
-  padding: 0;
-}
-
-.error-banner {
-  background-color: #fef2f2;
-  color: #b91c1c;
-  border: 1px solid #fecaca;
-  border-radius: 6px;
-  padding: 0.75rem 1rem;
-  margin-bottom: 1rem;
-  font-size: 0.9rem;
-}
-
-@media (max-width: 640px) {
-  .app-shell {
+/* Move navigation above the page on smaller screens. */
+@media (max-width: 700px) {
+  .app-layout {
     flex-direction: column;
   }
 
-  .sidebar {
-    width: 100%;
+  .app-sidebar {
+    flex: 0 0 auto;
+    padding: 16px;
   }
 
-  .main-content {
-    max-width: none;
-    padding: 1rem;
+  .sidebar-brand {
+    margin-bottom: 16px;
+  }
+
+  .app-content > main {
+    padding: 20px;
   }
 }

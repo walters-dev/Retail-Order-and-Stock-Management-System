@@ -1,189 +1,327 @@
-import { useCallback, useEffect, useState } from "react";
-import { getProducts, login, USE_MOCK_API } from "./services/api";
-import Products from "./pages/Products";
-import ProductManagement from "./pages/ProductManagement";
-import "./App.css";
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  createBrowserRouter,
+  Link,
+  Navigate,
+  NavLink,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+} from 'react-router';
+import Customers from './pages/Customers.jsx';
+import Products from './pages/Products.jsx';
+import ProductManagement from './pages/ProductManagement.jsx';
+import CreateOrder from './pages/CreateOrder.jsx';
+import QuoteSummary from './pages/QuoteSummary.jsx';
+import Orders from './pages/Orders.jsx';
+import OrderDetails from './pages/OrderDetails.jsx';
+import './App.css';
+import Login from './pages/Login.jsx';
+import Reports from './pages/Reports.jsx';
+import { AuthProvider, useAuth } from './auth/authContext.jsx';
 
-export default function App() {
-  const [accessToken, setAccessToken] = useState(
-    () => USE_MOCK_API ? "mock" : sessionStorage.getItem("retailOrderAccessToken") || ""
-  );
-  const [role, setRole] = useState(
-    () => USE_MOCK_API ? "Admin" : sessionStorage.getItem("retailOrderRole") || ""
-  );
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [loginError, setLoginError] = useState("");
-  const [loggingIn, setLoggingIn] = useState(false);
+function AppWorkspace({ selectedProduct, setSelectedProduct }) {
+  const { token } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const [products, setProducts] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
-  const [productsError, setProductsError] = useState("");
-  const [activeScreen, setActiveScreen] = useState("products");
-  const canManageProducts = ["admin", "manager"].includes(role.toLowerCase());
+  const [productsError, setProductsError] = useState('');
 
-  const loadProducts = useCallback(async () => {
-    if (!USE_MOCK_API && !sessionStorage.getItem("retailOrderAccessToken")) return;
+  const [customers, setCustomers] = useState([]);
+  const [quoteDraft, setQuoteDraft] = useState(null);
+  const [submittingOrder, setSubmittingOrder] = useState(false);
 
+  const fetchProducts = useCallback(async () => {
     setLoadingProducts(true);
-    setProductsError("");
+    setProductsError('');
     try {
-      setProducts(await getProducts());
+      const headers = {};
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+      const response = await fetch('/api/products', { headers });
+      if (!response.ok) {
+        const problem = await response.json().catch(() => null);
+        setProductsError(problem?.message || 'Unable to load products.');
+        return;
+      }
+      const data = await response.json();
+      setProducts(Array.isArray(data) ? data : data?.items ?? []);
     } catch (err) {
-      setProductsError(err.message || "Failed to load products.");
+      console.error(err);
+      setProductsError('Unable to load products. Please try again.');
     } finally {
       setLoadingProducts(false);
     }
-  }, []);
+  }, [token]);
 
   useEffect(() => {
-    if (!accessToken) return;
+    let ignore = false;
 
-    let active = true;
-    getProducts()
-      .then((result) => {
-        if (active) {
-          setProducts(result);
-          setProductsError("");
+    async function loadInitialData() {
+      const headers = {};
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      try {
+        const [productsRes, customersRes] = await Promise.all([
+          fetch('/api/products', { headers }),
+          fetch('/api/customers', { headers }),
+        ]);
+
+        if (ignore) return;
+
+        if (!productsRes.ok) {
+          const problem = await productsRes.json().catch(() => null);
+          setProductsError(problem?.message || 'Unable to load products.');
+        } else {
+          const productData = await productsRes.json();
+          if (!ignore) {
+            setProducts(
+              Array.isArray(productData) ? productData : productData?.items ?? []
+            );
+            setProductsError('');
+          }
         }
-      })
-      .catch((err) => {
-        if (active) setProductsError(err.message || "Failed to load products.");
-      })
-      .finally(() => {
-        if (active) setLoadingProducts(false);
-      });
+
+        if (customersRes.ok) {
+          const customerData = await customersRes.json();
+          if (!ignore) {
+            const list = Array.isArray(customerData)
+              ? customerData
+              : customerData?.items ?? [];
+            setCustomers(list.filter((c) => c.isActive !== false));
+          }
+        }
+      } catch (err) {
+        if (ignore) return;
+        console.error(err);
+        setProductsError('Unable to load products. Please try again.');
+      } finally {
+        if (!ignore) {
+          setLoadingProducts(false);
+        }
+      }
+    }
+
+    loadInitialData();
 
     return () => {
-      active = false;
+      ignore = true;
     };
-  }, [accessToken]);
+  }, [token]);
 
-  async function handleLogin(event) {
-    event.preventDefault();
-    setLoginError("");
-    setLoggingIn(true);
+  const categories = useMemo(() => {
+    const unique = new Set(
+      products
+        .map((p) => String(p?.category ?? '').trim())
+        .filter((c) => c && c !== 'ALL')
+    );
+    return Array.from(unique).sort((a, b) => a.localeCompare(b));
+  }, [products]);
 
+  async function handleGetQuote(orderRequest) {
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    const response = await fetch('/api/orders/quote', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(orderRequest),
+    });
+
+    if (!response.ok) {
+      const problem = await response.json().catch(() => null);
+      throw new Error(problem?.message || 'Unable to calculate order quote.');
+    }
+
+    const quoteData = await response.json();
+    setQuoteDraft({
+      ...quoteData,
+      customerId: quoteData.customerId ?? orderRequest.customerId,
+      customerName: quoteData.customerName ?? orderRequest.customerName,
+      items: orderRequest.items,
+    });
+    navigate('/quote-summary');
+  }
+
+  async function handleSubmitOrder() {
+    if (!quoteDraft) return;
+
+    setSubmittingOrder(true);
     try {
-      const result = await login(username.trim(), password);
-      sessionStorage.setItem("retailOrderAccessToken", result.token);
-      sessionStorage.setItem("retailOrderRole", result.role);
-      setLoadingProducts(true);
-      setProductsError("");
-      setAccessToken(result.token);
-      setRole(result.role);
-      setPassword("");
-    } catch (err) {
-      setLoginError(err.message || "Unable to sign in.");
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          customerId: quoteDraft.customerId,
+          items: quoteDraft.items,
+        }),
+      });
+
+      if (!response.ok) {
+        const problem = await response.json().catch(() => null);
+        throw new Error(problem?.message || 'Unable to submit the order.');
+      }
+
+      setQuoteDraft(null);
+      await fetchProducts();
+      navigate('/orders');
     } finally {
-      setLoggingIn(false);
+      setSubmittingOrder(false);
     }
   }
 
-  function handleLogout() {
-    sessionStorage.removeItem("retailOrderAccessToken");
-    sessionStorage.removeItem("retailOrderRole");
-    setAccessToken("");
-    setRole("");
-    setProducts([]);
-  }
-
-  if (!USE_MOCK_API && !accessToken) {
-    return (
-      <main className="main-content">
-        <section className="panel">
-          <h1>Sign in</h1>
-          <p className="subtitle">Sign in to use the store workspace.</p>
-          {loginError && (
-            <div className="error-banner" role="alert">
-              {loginError}
-            </div>
-          )}
-          <form onSubmit={handleLogin} className="product-form">
-            <div className="form-group">
-              <label htmlFor="login-username">Username</label>
-              <input
-                id="login-username"
-                autoComplete="username"
-                value={username}
-                onChange={(event) => setUsername(event.target.value)}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="login-password">Password</label>
-              <input
-                id="login-password"
-                type="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                required
-              />
-            </div>
-            <div className="form-actions-right">
-              <button type="submit" className="btn-primary" disabled={loggingIn}>
-                {loggingIn ? "Signing in..." : "Sign in"}
-              </button>
-            </div>
-          </form>
-        </section>
-      </main>
-    );
-  }
+  const activeProduct = location.state?.product ?? selectedProduct;
+  const editorKey = activeProduct?.productId ?? activeProduct?.id ?? 'new';
 
   return (
-    <div className="app-shell">
-      <aside className="sidebar">
-        <div className="brand">
-          <div className="brand-badge">R</div>
-          <div>
-            <div className="brand-title">Retail Order &amp; Stock</div>
-            <div className="brand-sub">Store Workspace</div>
-          </div>
-        </div>
-
-        <nav className="nav-list" aria-label="Main navigation">
-          <button
-            type="button"
-            className={`nav-item ${activeScreen === "products" ? "active" : ""}`}
-            onClick={() => setActiveScreen("products")}
-          >
-            Products
-          </button>
-          {canManageProducts && (
-            <button
-              type="button"
-              className={`nav-item ${activeScreen === "product-management" ? "active" : ""}`}
-              onClick={() => setActiveScreen("product-management")}
-            >
-              Product Management
-            </button>
-          )}
-        </nav>
-
-        <div className="sidebar-footer">
-          <span className="role-dot" />
-          <span>{role || "Store Staff / Admin"}</span>
-          {!USE_MOCK_API && (
-            <button type="button" className="btn-link" onClick={handleLogout}>
-              Sign out
-            </button>
-          )}
-        </div>
-      </aside>
-
-      <main className="main-content">
-        {activeScreen === "product-management" && canManageProducts ? (
-          <ProductManagement products={products} onSaved={loadProducts} />
-        ) : (
-          <Products
-            products={products}
-            loading={loadingProducts}
-            error={productsError}
-            onRefresh={loadProducts}
-          />
-        )}
-      </main>
+    <div className="app-content">
+      <Routes>
+        <Route path="/orders/:orderId" element={<OrderDetails />} />
+        <Route path="/orders" element={<Orders />} />
+        <Route path="/" element={<Navigate to="/customers" replace />} />
+        <Route path="/customers" element={<Customers />} />
+        <Route
+          path="/products"
+          element={
+            <Products
+              products={products}
+              loading={loadingProducts}
+              error={productsError}
+              onRefresh={fetchProducts}
+              onEditProduct={(product) => setSelectedProduct(product)}
+            />
+          }
+        />
+        <Route
+          path="/product-management"
+          element={
+            <ProductManagement
+              key={editorKey}
+              products={products}
+              categories={categories}
+              selectedProduct={activeProduct}
+              onSelectProduct={(product) => setSelectedProduct(product)}
+              loading={loadingProducts}
+              onRefresh={fetchProducts}
+              onSaved={() => {
+                setSelectedProduct(null);
+                fetchProducts();
+                navigate('/product-management', { replace: true, state: null });
+              }}
+              onCancel={() => {
+                setSelectedProduct(null);
+                navigate('/products', { state: null });
+              }}
+            />
+          }
+        />
+        <Route
+          path="/create-order"
+          element={
+            <CreateOrder
+              customers={customers}
+              products={products}
+              onGetQuote={handleGetQuote}
+              onCancel={() => {
+                setQuoteDraft(null);
+                navigate('/orders');
+              }}
+            />
+          }
+        />
+        <Route
+          path="/quote-summary"
+          element={
+            <QuoteSummary
+              quote={quoteDraft}
+              onSubmitOrder={handleSubmitOrder}
+              onBack={() => navigate('/create-order')}
+              submitting={submittingOrder}
+            />
+          }
+        />
+        <Route path="/login" element={<Login />} />
+        <Route path="/reports" element={<Reports />} />
+        <Route
+          path="*"
+          element={
+            <main>
+              <h1>Page not found</h1>
+              <Link to="/customers">Go to Customers</Link>
+            </main>
+          }
+        />
+      </Routes>
     </div>
   );
 }
+
+export default function App() {
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
+  return (
+    <div className="app-layout">
+      <aside className="app-sidebar">
+        <p className="sidebar-brand">
+          Retail Order
+          <br />
+          &amp; Stock
+        </p>
+
+        <nav aria-label="Main navigation">
+          <NavLink to="/customers" className="sidebar-link">
+            Customers
+          </NavLink>
+
+          <NavLink to="/products" className="sidebar-link">
+            Products
+          </NavLink>
+
+          <NavLink to="/product-management" className="sidebar-link">
+            Product Management
+          </NavLink>
+
+          <NavLink to="/create-order" className="sidebar-link">
+            Create Order
+          </NavLink>
+
+          <NavLink to="/orders" className="sidebar-link">
+            Orders
+          </NavLink>
+
+          <NavLink to="/reports" className="sidebar-link">
+            Reports
+          </NavLink>
+        </nav>
+      </aside>
+
+      <AuthProvider>
+        <AppWorkspace
+          selectedProduct={selectedProduct}
+          setSelectedProduct={setSelectedProduct}
+        />
+      </AuthProvider>
+    </div>
+  );
+}
+
+/* eslint-disable react-refresh/only-export-components */
+export const router = createBrowserRouter([
+  {
+    path: '/*',
+    element: <App />,
+  },
+]);

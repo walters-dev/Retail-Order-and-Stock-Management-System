@@ -1,0 +1,310 @@
+/* Scoped styles for Create Order & Quote Summary to prevent sidebar overrides */
+.order-builder {
+  width: 100%;
+  padding: 24px;
+  min-width: 0;
+}
+
+.order-card {
+  background-color: #ffffff;
+  border: 1px solid #dbe3ee;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.order-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.order-subtitle {
+  font-size: 14px;
+  color: #64748b;
+  margin: 4px 0 0;
+}
+
+/* Fields & Inputs */
+.order-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.order-form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.order-select {
+  width: 100%;
+  max-width: 400px;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background-color: #ffffff;
+  font-size: 14px;
+  color: #0f172a;
+}
+
+.order-select:focus {
+  outline: none;
+  border-color: #000000;
+}
+
+/* Items Table & Rows */
+.order-table-wrapper {
+  margin-top: 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.order-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  min-width: 600px;
+}
+
+.order-table th {
+  background-color: #f1f5f9;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.order-table td {
+  padding: 14px 16px;
+  font-size: 14px;
+  color: #0f172a;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: middle;
+}
+
+.order-table tr:last-child td {
+  border-bottom: none;
+}
+
+.order-stock-label {
+  display: block;
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+.order-stock-error {
+  color: #b91c1c;
+}
+
+/* Add / Remove Actions */
+.order-qty-input {
+  width: 70px;
+  padding: 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.order-qty-input:focus {
+  outline: none;
+  border-color: #000000;
+}
+
+.order-remove-btn {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.order-remove-btn:hover {
+  color: #b91c1c;
+}
+
+.order-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px dashed #cbd5e1;
+  color: #000000;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 16px;
+}
+
+.order-add-btn:hover {
+  background-color: #f8fafc;
+  border-color: #94a3b8;
+}
+
+/* Layout Footers */
+.order-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.order-footnote {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+}
+
+.order-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.order-btn-cancel,
+.order-btn-submit {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.order-btn-cancel {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #0f172a;
+}
+
+.order-btn-cancel:hover {
+  background-color: #f1f5f9;
+}
+
+.order-btn-submit {
+  background-color: #000000;
+  border: 1px solid #000000;
+  color: #ffffff;
+}
+
+.order-btn-submit:hover:not(:disabled) {
+  background-color: #333333;
+  border-color: #333333;
+}
+
+.order-btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Quote Summary Card specific styling */
+.quote-summary-meta {
+  font-size: 15px;
+  color: #0f172a;
+  margin-bottom: 20px;
+}
+
+.quote-highlight-box {
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 24px;
+}
+
+.quote-highlight-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e3a8a;
+  margin: 0 0 4px;
+}
+
+.quote-highlight-desc {
+  font-size: 13px;
+  color: #1e40af;
+  margin: 0;
+}
+
+/* Summary Grid aligning items with mockups */
+.quote-total-grid {
+  display: grid;
+  grid-template-columns: 1fr 120px;
+  gap: 8px;
+  max-width: 400px;
+  margin-left: auto;
+  text-align: right;
+  margin-top: 24px;
+  font-size: 14px;
+}
+
+.quote-total-label {
+  color: #64748b;
+}
+
+.quote-total-value {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.quote-total-discount {
+  color: #15803d;
+}
+
+.quote-total-final-label {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 8px;
+}
+
+.quote-total-final-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 8px;
+}
+
+.order-error-banner {
+  padding: 12px;
+  border-radius: 6px;
+  background-color: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 600px) {
+  .order-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .order-actions {
+    width: 100%;
+  }
+  .order-btn-cancel,
+  .order-btn-submit {
+    flex: 1;
+    width: 100%;
+  }
+}

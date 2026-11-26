@@ -1,190 +1,228 @@
-import { useMemo, useState } from "react";
-import "./Products.css";
+import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router';
+import './Products.css';
 
 const LOW_STOCK_THRESHOLD = 50;
 
-function normalizeProduct(raw, index) {
-  const safeRaw = raw && typeof raw === "object" ? raw : {};
+function normalizeProduct(raw, index = 0) {
+  const item = raw ?? {};
+  const rawPrice = Number(item.unitPrice ?? item.price ?? 0);
+  const rawStock = Number(item.stockQuantity ?? item.stock ?? 0);
 
   return {
-    productId: safeRaw.productId ?? safeRaw.id ?? index + 1,
-    sku: String(safeRaw.sku ?? safeRaw.SKU ?? ""),
-    name: String(safeRaw.name ?? safeRaw.productName ?? ""),
-    category: String(safeRaw.category ?? "General"),
-    unitPrice: Number(safeRaw.unitPrice ?? safeRaw.price ?? 0),
-    stockQuantity: Number(safeRaw.stockQuantity ?? safeRaw.stock ?? 0),
-    isActive: Boolean(safeRaw.isActive ?? safeRaw.active ?? true),
+    productId: item.productId ?? item.id ?? index + 1,
+    sku: String(item.sku ?? item.SKU ?? '').trim(),
+    name: String(item.name ?? item.productName ?? '').trim(),
+    category: String(item.category ?? 'General').trim() || 'General',
+    unitPrice: Number.isFinite(rawPrice) ? rawPrice : 0,
+    stockQuantity: Number.isFinite(rawStock) ? rawStock : 0,
+    isActive: Boolean(item.isActive ?? item.active ?? true),
   };
 }
 
 export default function Products({
   products = [],
   loading = false,
-  error = "",
+  error = '',
   onRefresh,
+  onEditProduct,
 }) {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("ALL");
+  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('ALL');
 
-  // Step A: Normalize every product item once per change to `products`
-  const normalizedProducts = useMemo(
-    () => products.map((item, idx) => normalizeProduct(item, idx)),
-    [products]
-  );
+  const normalizedProducts = useMemo(() => {
+    const list = Array.isArray(products) ? products : [];
+    return list.map((item, idx) => normalizeProduct(item, idx));
+  }, [products]);
 
-  // Step B: Build a sorted list of unique categories for the dropdown
   const categories = useMemo(() => {
     const unique = new Set(
-      normalizedProducts.map((product) => product.category).filter(Boolean)
+      normalizedProducts.map((p) => p.category).filter(Boolean)
     );
-    return [...unique].sort((a, b) => a.localeCompare(b));
+    return Array.from(unique).sort((a, b) => a.localeCompare(b));
   }, [normalizedProducts]);
 
-  // Step C: Filter by selected category and search text (SKU or product name)
   const filteredProducts = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
 
     return normalizedProducts.filter((product) => {
       const matchesCategory =
-        selectedCategory === "ALL" || product.category === selectedCategory;
+        selectedCategory === 'ALL' || product.category === selectedCategory;
 
-      const matchesSearch =
-        !query ||
+      if (!matchesCategory) return false;
+      if (!query) return true;
+
+      return (
         product.sku.toLowerCase().includes(query) ||
-        product.name.toLowerCase().includes(query);
-
-      return matchesCategory && matchesSearch;
+        product.name.toLowerCase().includes(query)
+      );
     });
   }, [normalizedProducts, searchTerm, selectedCategory]);
 
-  // Summary counts for the subtitle
-  const activeCount = normalizedProducts.filter((p) => p.isActive).length;
-  const lowStockCount = normalizedProducts.filter(
-    (p) => p.isActive && p.stockQuantity <= LOW_STOCK_THRESHOLD
-  ).length;
+  const activeCount = useMemo(
+    () => normalizedProducts.filter((p) => p.isActive).length,
+    [normalizedProducts]
+  );
+
+  const lowStockCount = useMemo(
+    () =>
+      normalizedProducts.filter(
+        (p) => p.isActive && p.stockQuantity <= LOW_STOCK_THRESHOLD
+      ).length,
+    [normalizedProducts]
+  );
+
+  function handleNavigateToEdit(product = null) {
+    onEditProduct?.(product);
+    navigate('/product-management', {
+      state: product ? { product } : undefined,
+    });
+  }
 
   return (
-    <section className="products-screen" aria-label="Products">
-      <div className="products-header">
-        <div>
-          <h2 className="products-title">Products</h2>
-          <p className="products-subtitle">
-            Active products and current stock ({activeCount} active &bull;{" "}
-            {lowStockCount} low stock)
-          </p>
+    <section className="products-page">
+      <div className="products-card">
+        <div className="products-header">
+          <div>
+            <h1 className="products-title">Products</h1>
+            <p className="products-subtitle">
+              Active products and current stock ({activeCount} active -{' '}
+              {lowStockCount} low stock)
+            </p>
+          </div>
+
+          <div className="products-header-actions">
+            <button
+              type="button"
+              className="products-secondary-btn"
+              onClick={() => handleNavigateToEdit(null)}
+              disabled={loading}
+            >
+              Edit Product
+            </button>
+
+            {onRefresh && (
+              <button
+                type="button"
+                className="products-refresh-btn"
+                onClick={onRefresh}
+                disabled={loading}
+              >
+                {loading ? 'Refreshing...' : 'Refresh'}
+              </button>
+            )}
+          </div>
         </div>
 
-        {onRefresh && (
-          <button
-            type="button"
-            className="products-refresh-btn"
-            onClick={onRefresh}
+        <div className="products-toolbar">
+          <input
+            type="search"
+            className="products-search"
+            placeholder="Search by SKU or name"
+            aria-label="Search by SKU or name"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            disabled={loading}
+          />
+
+          <select
+            className="products-category-select"
+            aria-label="Filter by category"
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
             disabled={loading}
           >
-            {loading ? "Refreshing..." : "Refresh"}
-          </button>
+            <option value="ALL">All categories</option>
+            {categories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {loading && (
+          <p className="products-loading">Loading products...</p>
         )}
-      </div>
 
-      <div className="products-toolbar">
-        <input
-          type="search"
-          className="products-search-input"
-          placeholder="Search by SKU or name"
-          aria-label="Search by SKU or name"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+        {!loading && error && (
+          <div role="alert" className="products-error">
+            {error}
+          </div>
+        )}
 
-        <select
-          className="products-category-select"
-          aria-label="Filter by category"
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-        >
-          <option value="ALL">All categories</option>
-          {categories.map((category) => (
-            <option key={category} value={category}>
-              {category}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {loading && (
-        <p className="products-status-message">Loading products...</p>
-      )}
-
-      {!loading && error && (
-        <div className="products-error-banner" role="alert">
-          {error}
-        </div>
-      )}
-
-      {!loading && !error && (
-        <div className="products-table-wrapper">
-          <table className="products-table">
-            <thead>
-              <tr>
-                <th>SKU</th>
-                <th>Product</th>
-                <th>Category</th>
-                <th>Price</th>
-                <th>Stock</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredProducts.length === 0 ? (
+        {!loading && !error && (
+          <div className="products-table-wrap">
+            <table className="products-table">
+              <thead>
                 <tr>
-                  <td colSpan={6} className="products-empty-cell">
-                    No products match your search or category filter.
-                  </td>
+                  <th>SKU</th>
+                  <th>Product</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Stock</th>
+                  <th>Status</th>
+                  <th>Action</th>
                 </tr>
-              ) : (
-                filteredProducts.map((product) => {
-                  const isLowStock = product.stockQuantity <= LOW_STOCK_THRESHOLD;
-                  const safePrice = Number.isFinite(product.unitPrice)
-                    ? product.unitPrice
-                    : 0;
-                  const safeStock = Number.isFinite(product.stockQuantity)
-                    ? product.stockQuantity
-                    : 0;
+              </thead>
+              <tbody>
+                {filteredProducts.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="products-empty">
+                      No products match your search or category filter.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredProducts.map((product) => {
+                    const isLowStock =
+                      product.stockQuantity <= LOW_STOCK_THRESHOLD;
 
-                  return (
-                    <tr key={product.productId}>
-                      <td className="products-sku">{product.sku}</td>
-                      <td>{product.name}</td>
-                      <td>{product.category}</td>
-                      <td>R{safePrice.toFixed(2)}</td>
-                      <td className={isLowStock ? "products-stock-low" : ""}>
-                        {safeStock}
-                      </td>
-                      <td>
-                        <span
-                          className={`products-badge ${
-                            product.isActive
-                              ? "products-badge-active"
-                              : "products-badge-inactive"
-                          }`}
+                    return (
+                      <tr key={product.productId}>
+                        <td className="products-sku">{product.sku}</td>
+                        <td>{product.name}</td>
+                        <td>{product.category}</td>
+                        <td>R{product.unitPrice.toFixed(2)}</td>
+                        <td
+                          className={isLowStock ? 'products-stock-low' : ''}
                         >
-                          {product.isActive ? "Active" : "Inactive"}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
+                          {product.stockQuantity}
+                        </td>
+                        <td>
+                          <span
+                            className={`products-status-pill ${
+                              product.isActive
+                                ? 'products-status-active'
+                                : 'products-status-inactive'
+                            }`}
+                          >
+                            {product.isActive ? 'Active' : 'Inactive'}
+                          </span>
+                        </td>
+                        <td>
+                          <button
+                            type="button"
+                            className="products-row-edit-btn"
+                            onClick={() => handleNavigateToEdit(product)}
+                          >
+                            Edit Product
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
 
-      <p className="products-footnote">
-        <span className="products-footnote-low">Red stock = low stock</span>{" "}
-        (at or below {LOW_STOCK_THRESHOLD} units). View only: product changes are
-        made by Manager/Admin.
-      </p>
+        <p className="products-footnote">
+          <span className="products-footnote-low">Red stock = low stock</span>{' '}
+          ( &lt;= {LOW_STOCK_THRESHOLD})
+        </p>
+      </div>
     </section>
   );
 }
