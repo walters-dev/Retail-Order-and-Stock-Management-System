@@ -1,32 +1,41 @@
-import { Navigate, Outlet, useLocation} from "react-router-dom";
-import {useAuth} from "./authContext";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { useAuth } from "./authContext";
 
-export function ProtectedRoute(){
-    const {role} = useAuth();
+export function ProtectedRoute() {
+    const { role } = useAuth();
     const location = useLocation();
 
-    if ((role == null)|(!role)){
-        return <Navigate to="/Login" state={{ from: location}} replace/>
+    if ((role == null) | (!role)) {
+        return <Navigate to="/Login" state={{ from: location }} replace />
     }
-    return <Outlet/>;
+    return <Outlet />;
 }
 
-export function ProtectedAdminStaffRoute(){
-    const {role} = useAuth();
+export function ProtectedAdminStaffRoute() {
+    const { role } = useAuth();
     const location = useLocation();
 
-    if (role == "Manager"){
-        return <Navigate to="/Login" state={{ from: location}} replace/>
+    if (role == "Manager") {
+        return <Navigate to="/Login" state={{ from: location }} replace />
     }
-    return <Outlet/>;
+    return <Outlet />;
 }
 
-export function ProtectedManagerAdminRoute(){
-    const {role} = useAuth();
+export function ProtectedManagerAdminRoute() {
+    const { role } = useAuth();
     const location = useLocation();
 
-    if (role=="Staff"){
-        return <Navigate to="/Login" state={{ from: location}} replace/>
+    if (role == "Staff") {
+        return <Navigate to="/Login" state={{ from: location }} replace />
     }
-    return <Outlet/>;
+    return <Outlet />;
+}
+export function ProtectedManagerRoute() {
+    const { role } = useAuth();
+    const location = useLocation();
+
+    if (role == "Staff" | role == "Admin") {
+        return <Navigate to="/Login" state={{ from: location }} replace />
+    }
+    return <Outlet />;
 }

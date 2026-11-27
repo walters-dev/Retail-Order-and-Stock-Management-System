@@ -16,7 +16,7 @@ export default function Registry() {
     const [errorResponse, setErrorResponse] = useState('');
     const handleSubmit = (event) => {
         event?.preventDefault();
-        registerAttempt({ userName, password, email,  selectedType});
+        registerAttempt({ userName, password, email, selectedType });
     }
     const registerAttempt = async (data) => {
         try {
@@ -26,11 +26,11 @@ export default function Registry() {
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`,
-                    
+
                 },
                 body: JSON.stringify(data)//serializer
             });
-            if(response.status == 403){
+            if (response.status == 403) {
                 throw new Error("You are not authorized to access register");
             } else if (!response.ok) {
                 const body = await response.json().catch(() => null);//.catch(() => null) protects it from non json bodies/empty ones
@@ -49,62 +49,62 @@ export default function Registry() {
         <main>
             <h1>Registration</h1>
             <div className={styles.layout}>
-            <section className={styles.editor}>
-            <form onSubmit={handleSubmit} className={styles.loginform}>
-                {/* <h1 className={styles.title}>Login</h1> */}
-                <label>Username</label>
-                <input
-                    type="text"
-                    id="userName"
-                    name="userName"
-                    // placeholder="Enter Username"
-                    value={userName}
-                    onChange={c => setUserName(c.target.value)}//refreshes the value inputted
-                    maxLength="20"
-                    required
-                    className={styles.userinput} />
-<label>Password</label>
-                <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    // placeholder="Enter Password"
-                    value={password}
-                    onChange={c => setPassword(c.target.value)}
-                    maxLength="30"
-                    className={styles.userinput}
-                    required />
-<label>Email</label>
-                <input
-                    type="text"
-                    id="email"
-                    name="email"
-                    // placeholder="Enter Email"
-                    value={email}
-                    onChange={c => setEmail(c.target.value)}
-                    maxLength="30"
-                    className={styles.userinput}
-                    required />
-                    {errorResponse && <p role="alert">{errorResponse}</p>}
-                <div className={styles.buttonlayout}>
-                {types.map((type) => (
-                    <button
-                        key={type}
-                        type="button"
-                        className={styles.buttons}
-                        aria-pressed={selectedType === type}
-                        onClick={() => setSelectedType(type)}
-                        required
-                    >
-                        {type}
-                    </button>
-                ))}
-                </div>
-                <div className={styles.buttonlayout}>
-                <button type="submit" className={styles.buttons}>Login</button>
-           </div>
-            </form>
-            </section>
+                <section className={styles.editor}>
+                    <form onSubmit={handleSubmit} className={styles.loginform}>
+                        {/* <h1 className={styles.title}>Login</h1> */}
+                        <label>Username</label>
+                        <input
+                            type="text"
+                            id="userName"
+                            name="userName"
+                            // placeholder="Enter Username"
+                            value={userName}
+                            onChange={c => setUserName(c.target.value)}//refreshes the value inputted
+                            maxLength="20"
+                            required
+                            className={styles.userinput} />
+                        <label>Password</label>
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            // placeholder="Enter Password"
+                            value={password}
+                            onChange={c => setPassword(c.target.value)}
+                            maxLength="30"
+                            className={styles.userinput}
+                            required />
+                        <label>Email</label>
+                        <input
+                            type="text"
+                            id="email"
+                            name="email"
+                            // placeholder="Enter Email"
+                            value={email}
+                            onChange={c => setEmail(c.target.value)}
+                            maxLength="30"
+                            className={styles.userinput}
+                            required />
+                        {errorResponse && <p role="alert">{errorResponse}</p>}
+                        <div className={styles.buttonlayout}>
+                            {types.map((type) => (
+                                <button
+                                    key={type}
+                                    type="button"
+                                    className={styles.buttons}
+                                    aria-pressed={selectedType === type}
+                                    onClick={() => setSelectedType(type)}
+                                    required
+                                >
+                                    {type}
+                                </button>
+                            ))}
+                        </div>
+                        <div className={styles.buttonlayout}>
+                            <button type="submit" className={styles.buttons}>Login</button>
+                        </div>
+                    </form>
+                </section>
             </div>
         </main>
     )

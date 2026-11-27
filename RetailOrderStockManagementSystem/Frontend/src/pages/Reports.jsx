@@ -9,14 +9,15 @@ export default function Report() {
     const [isLoading, setIsLoading] = useState(true);
     const [queryParameters, setQueryParameters] = useSearchParams();
     const currentPage = Number(queryParameters.get('page')) || 1;
-    useEffect(() => {
-    setQueryParameters((queryParameters)=>({
-            'Pagesize':20
-        }));
-    },[]);
+    const pageSize = Number(queryParameters.get('Pagesize')) || 20;
+    // useEffect(() => {
+    // setQueryParameters((queryParameters)=>({
+    //         'Pagesize':20
+    //     }));
+    // },[pageSize]);
     useEffect(() => {
         const controller = new AbortController()
-        
+
         async function loadReports() {
             try {
                 const response = await fetch('/api/reports/sales-summary', {
@@ -44,8 +45,12 @@ export default function Report() {
                 setErrorResponse(error.message);
                 console.log(error);
             }
+            const params = new URLSearchParams({
+                page: String(currentPage),
+                Pagesize: String(pageSize),
+            });
             try {
-                const response = await fetch(`/api/reports/low-stock?${queryParameters}`, {
+                const response = await fetch(`/api/reports/low-stock?${params}`, {
                     // method: "GET",
                     // signal: controller.signal,
                     headers: {
@@ -88,18 +93,23 @@ export default function Report() {
         return () => controller.abort()
     }, [currentPage])
     const handleNextPage = () => {
-        setQueryParameters((prevParams) => {
-            prevParams.set('page', currentPage + 1);
-            return prevParams;
-        });}
-    const handlePreviousPage = () => {
-        setQueryParameters((prevParams) => {
-            prevParams.set('page', currentPage -1);
-            return prevParams;
+        setQueryParameters(prev => {
+            const next = new URLSearchParams(prev);
+            next.set('page', String(currentPage + 1));
+            return next;
         });
-    }
+    };
+
+    const handlePreviousPage = () => {
+        setQueryParameters(prev => {
+            const next = new URLSearchParams(prev);
+            next.set('page', String(Math.max(1, currentPage - 1)));
+            return next;
+        });
+    };
+
     if (isLoading) {
-        return <p>Loading...</p>;
+        return <main><h1>Reports</h1><p>Loading...</p></main>;
     }
     return (
         <main>
@@ -138,13 +148,13 @@ export default function Report() {
                     )}
                 </table>
                 <div className={styles.pageselection}>
-                <button onClick={handlePreviousPage} className={styles.buttons}>
-                    Previous 
-                </button>
-                <p>  Page {currentPage}</p>
-                <button onClick={handleNextPage} className={styles.buttons}>
-                    Next 
-                </button>
+                    <button onClick={handlePreviousPage} className={styles.buttons}>
+                        Previous
+                    </button>
+                    <p>  Page {currentPage}</p>
+                    <button onClick={handleNextPage} className={styles.buttons}>
+                        Next
+                    </button>
                 </div>
             </div>
         </main>

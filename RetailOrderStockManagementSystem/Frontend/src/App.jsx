@@ -7,9 +7,16 @@ import Login from './pages/Login.jsx';
 import Reports from './pages/Reports.jsx';
 import Registry from './pages/Register.jsx';
 import { AuthProvider } from './auth/authContext.jsx';
-import {ProtectedRoute, ProtectedAdminStaffRoute, ProtectedManagerAdminRoute} from './auth/ProtectedRoute.jsx'
+import { useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { ProtectedRoute, ProtectedAdminStaffRoute, ProtectedManagerAdminRoute, ProtectedManagerRoute } from './auth/ProtectedRoute.jsx'
 
 export default function App() {
+  const location = useLocation();
+  const [role, setRole] = useState('');
+  useEffect(() => {
+    setRole(JSON.parse(localStorage.getItem('role')));
+  }, [location.pathname]);
   return (
     <div className="app-layout">
       <aside className="app-sidebar">
@@ -20,65 +27,72 @@ export default function App() {
         </p>
 
         <nav aria-label="Main navigation">
-          <NavLink to="/customers" className="sidebar-link">
-            Customers
-          </NavLink>
-
-          <NavLink to="/orders" className="sidebar-link">
-            Orders
-          </NavLink>
-
-          <NavLink to="/reports" className="sidebar-link">
-            Reports
-          </NavLink>
-
-          <NavLink to="/register" className="sidebar-link">
-            Register
-          </NavLink>
+          {(role === "Admin" || role === "Staff") && (
+            <NavLink to="/customers" className="sidebar-link">
+              Customers
+            </NavLink>
+          )}
+          {(role === "Admin" || role === "Staff") && (
+            <NavLink to="/orders" className="sidebar-link">
+              Orders
+            </NavLink>
+          )}
+          {(role === "Admin" || role === "Manager") && (
+            <NavLink to="/reports" className="sidebar-link">
+              Reports
+            </NavLink>
+          )}
+          {(role === "Manager") && (
+            <NavLink to="/register" className="sidebar-link">
+              Register
+            </NavLink>
+          )}
         </nav>
       </aside>
 
       <div className="app-content">
-        
+
         <AuthProvider>
-          
+
           <Routes>
             <Route
               path="/login"
               element={<Login />}
             />
             {/* <Route element={<ProtectedRoute/>}> */}
-            <Route element={<ProtectedAdminStaffRoute/>}>
-            <Route
-              path="/orders/:orderId"
-              element={<OrderDetails />} />
-            <Route path="/orders" element={<Orders />} />
-            <Route
-              path="/"
-              element={<Navigate to="/customers" replace />}
-            />
+            <Route element={<ProtectedAdminStaffRoute />}>
+              <Route
+                path="/orders/:orderId"
+                element={<OrderDetails />} />
+              <Route path="/orders" element={<Orders />} />
+              <Route
+                path="/"
+                element={<Navigate to="/customers" replace />}
+              />
 
-            <Route
-              path="/customers"
-              element={<Customers />}
-            />
-            
+              <Route
+                path="/customers"
+                element={<Customers />}
+              />
+
             </Route>
-            <Route id="ManagerAdmin" element={<ProtectedManagerAdminRoute/>}>
-            <Route
-              path="/reports"
-              element={<Reports />}
-            />
-            <Route
-              path="/register"
-              element={<Registry/>}/>
-            
+            <Route id="ManagerAdmin" element={<ProtectedManagerAdminRoute />}>
+              <Route
+                path="/reports"
+                element={<Reports />}
+              />
             </Route>
-            
+            <Route id="Manager" element={<ProtectedManagerRoute />}>
+              <Route
+                path="/register"
+                element={<Registry />} />
+
+            </Route>
+
             {/* </Route> */}
-           
+
           </Routes>
-          
+
         </AuthProvider>
       </div>
     </div>

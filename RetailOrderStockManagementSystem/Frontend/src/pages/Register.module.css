@@ -1,9 +1,10 @@
-.loginform{
-    display: grid;
-    gap: 16px;
+.loginform {
+  display: grid;
+  gap: 16px;
 }
-.editor{
-min-width: 0;
+
+.editor {
+  min-width: 0;
   padding: 24px;
   background-color: white;
   border: 1px solid #dbe3ee;
@@ -16,26 +17,27 @@ min-width: 0;
   background-color: white;
   display: flex;
 }
+
 /* .editor form > div {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 } */
-.layout{
-    display: flex;
+.layout {
+  display: flex;
   /* flex-wrap: wrap; */
   align-items: flex-start;
   gap: 24px;
 }
 
-.userinput{
+.userinput {
   width: 300px;
   max-width: 100%;
   margin-right: 12px;
   margin-bottom: 20px;
 }
 
-.buttons{
+.buttons {
   padding: 8px 14px;
   border: 1px solid #cbd5e1;
   border-radius: 6px;
@@ -44,31 +46,36 @@ min-width: 0;
   font-weight: 600;
   width: 100px;
   margin-bottom: 20px;
-    
+
 }
 
-.buttons:hover:enabled{
+.buttons:hover:enabled {
   background-color: #f1f5f9;
 }
+
 .buttons button:disabled {
   opacity: 0.6;
 }
+
 .buttons[aria-pressed="true"]:hover:enabled {
   border-color: black;
   background-color: black;
   color: white;
 }
+
 .buttons[aria-pressed="true"] {
   border-color: black;
   background-color: black;
   color: white;
 }
+
 .buttons:focus-visible {
   outline: 2px solid black;
   outline-offset: 3px;
 }
-.buttonlayout{
-    display: flex;
+
+.buttonlayout {
+  display: flex;
   /* flex-wrap: wrap; */
   gap: 8px;
   margin-bottom: 24px;
