@@ -14,10 +14,18 @@ function Login(){
 const {loginAttempt} = useAuth();
 const [userName, setUserName] = useState('');
 const [password, setPassword] = useState('');
+const [errorResponse, setErrorResponse] = useState('');
 //logout();
-const handleSubmit = (event) => {
+const handleSubmit = async (event) => {
         event?.preventDefault();
-         loginAttempt({userName, password});
+        try{
+            await loginAttempt({userName, password});
+        }
+        catch(error){
+            setErrorResponse(error.message);
+            console.log(error);
+        }
+         
     }
     return(
         // <section>
@@ -49,10 +57,13 @@ const handleSubmit = (event) => {
                 maxLength="30"
                 className={styles.userinput}
                 required/>
+                {errorResponse && <p role="alert">{errorResponse}</p>}
             <button type="submit" className={styles.buttons}>Login</button>
             
             <button className={styles.buttons}>Password reset</button>
+            
          </form> 
+         
         </div>
         // </section>
     )

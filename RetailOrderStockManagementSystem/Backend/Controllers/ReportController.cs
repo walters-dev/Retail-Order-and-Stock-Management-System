@@ -8,7 +8,7 @@ namespace RetailOrderStockManagementSystem.Backend.Controllers
 {
     [ApiController]
     [Route("api/reports")]
-    [Authorize(Roles = "Manager")]
+    [Authorize(Roles = "Admin, Manager")]
     public class ReportController : ControllerBase
     {
         private readonly IMapper _mapper;

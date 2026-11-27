@@ -1,96 +1,152 @@
 import styles from './Reports.module.css'
 import { useEffect, useState } from 'react'
-
-export default function Report(){
-    const[summary, setSummary] = useState({count: 0, totalCompleted: 0, totalSales: 0, lowStock: []});
-    const[stock, setStock] = useState([]);
+import { useSearchParams } from 'react-router-dom';
+export default function Report() {
+    const [summary, setSummary] = useState({ count: 0, totalCompleted: 0, totalSales: 0, lowStock: [] });
+    const [stock, setStock] = useState([]);
+    const [errorResponse, setErrorResponse] = useState('');
     const token = localStorage.getItem('token');
-    useEffect(()=>{
+    const [isLoading, setIsLoading] = useState(true);
+    const [queryParameters, setQueryParameters] = useSearchParams();
+    const currentPage = Number(queryParameters.get('page')) || 1;
+    useEffect(() => {
+    setQueryParameters((queryParameters)=>({
+            'Pagesize':20
+        }));
+    },[]);
+    useEffect(() => {
         const controller = new AbortController()
-    async function loadReports(){
-        try {
-            const response = await fetch('/api/reports/sales-summary', {
-                // method: "GET",
-                signal: controller.signal,
-                headers: { 
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`,
-                 },
-              //  body: JSON.stringify(data)//serializer
-            });
-            if (!response.ok) {
-                throw new Error('Reports request failed: ${response.status}');
-            }
-            //setResult();
-            const data = await response.json();
-            setSummary({
-                count: data.count,
-                totalCompleted: data.totalCompleted ?? 0,
-                totalSales: data.totalRevenue ?? 0,
-                orders: Array.isArray(data.orders) ? data.orders : [],
-            });
-        } catch (error) {
-            console.log(error);
-        }
-        try {
-            const response = await fetch('/api/reports/low-stock', {
-                // method: "GET",
-                signal: controller.signal,
-                headers: { 
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`,
-                 },
-              //  body: JSON.stringify(data)//serializer
-            });
-            if (!response.ok) {
-                throw new Error('Reports request failed: ${response.status}');
-            }
-            //setResult();
-            const result = await response.json();
-            setStock(
-                
-                Array.isArray(result) ? result : [],
-            );
-        } catch (error) {
-            console.log(error);
-        }
-        // setResult(data.map((orders)=>({
-        //     ...orders,
-        //     id: orders.OrderId
-        // })))
         
-}
-loadReports()
-return () => controller.abort()
-}, [])
-    return(
-        <>
-        <h1>Reports</h1>
-        <div className ={styles.LowStockProducts}>
-            <div className={styles.Summary}>
-                <div className ={styles.CompletedOrders}>
-                    <p>Completed Orders{summary.totalCompleted}</p>
+        async function loadReports() {
+            try {
+                const response = await fetch('/api/reports/sales-summary', {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`,
+                    },
+                });
+                if (response.status == 403) {
+                    throw new Error("You are not authorized to access reports");
+                } else if (!response.ok) {
+                    const body = await response.json().catch(() => null);//.catch(() => null) protects it from non json bodies/empty ones
+                    const message = body && body.message ? body.message : `Reports request failed: (${response.status})`;
+                    throw new Error(message);
+                }
+                //setResult();
+                const data = await response.json();
+                setSummary({
+                    count: data.count,
+                    totalCompleted: data.totalCompleted ?? 0,
+                    totalSales: data.totalRevenue ?? 0,
+                    orders: Array.isArray(data.orders) ? data.orders : [],
+                });
+            } catch (error) {
+                setErrorResponse(error.message);
+                console.log(error);
+            }
+            try {
+                const response = await fetch(`/api/reports/low-stock?${queryParameters}`, {
+                    // method: "GET",
+                    // signal: controller.signal,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`,
+                    },
+                    //  query:{
+                    //  Page: currentPage,
+                    //  PageSize: 20,
+                    //  }
+                    //  body: JSON.stringify(data)//serializer
+                });
+                if (response.status == 403) {
+                    throw new Error("You are not authorized to access reports");
+                } else if (!response.ok) {
+                    const body = await response.json().catch(() => null);//.catch(() => null) protects it from non json bodies/empty ones
+                    const message = body && body.message ? body.message : `Reports request failed: (${response.status})`;
+                    throw new Error(message);
+                }
+                //setResult();
+                const result = await response.json();
+                setStock(
+
+                    Array.isArray(result) ? result : [],
+                );
+            } catch (error) {
+                { errorResponse && <p role="alert">{errorResponse}</p> }
+                console.log(error);
+            }
+            setIsLoading(false);
+            // setResult(data.map((orders)=>({
+            //     ...orders,
+            //     id: orders.OrderId
+            // })))
+
+        }
+
+        loadReports()
+
+        return () => controller.abort()
+    }, [currentPage])
+    const handleNextPage = () => {
+        setQueryParameters((prevParams) => {
+            prevParams.set('page', currentPage + 1);
+            return prevParams;
+        });}
+    const handlePreviousPage = () => {
+        setQueryParameters((prevParams) => {
+            prevParams.set('page', currentPage -1);
+            return prevParams;
+        });
+    }
+    if (isLoading) {
+        return <p>Loading...</p>;
+    }
+    return (
+        <main>
+            <h1>Reports</h1>
+            <div className={styles.Layout}>
+                <div className={styles.Summary}>
+                    <div className={styles.CompletedOrders}>
+                        <p>Completed Orders</p>
+                        <h2>{summary.totalCompleted}</h2>
+                    </div>
+                    <div className={styles.TotalSales}>
+                        <p>Total Sales </p>
+                        <h2 className={styles.money}>R {summary.totalSales}</h2>
+                    </div>
                 </div>
-                <div className ={styles.TotalSales}>
-                    <p>Total Sales {summary.totalSales} </p>
+                {errorResponse && <p role="alert">{errorResponse}</p>}
+                <h3>Low-Stock Products</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th scope="col">SKU</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Stock Quantity</th>
+                        </tr>
+                    </thead>
+                    {stock.map((info) =>
+                    (
+                        <tbody key={info.productId}>
+                            <tr >
+                                <td>{info.sku}</td>
+                                <td>{info.name}</td>
+                                <td>{info.stockQuantity}</td>
+                            </tr>
+                        </tbody>
+                    )
+                    )}
+                </table>
+                <div className={styles.pageselection}>
+                <button onClick={handlePreviousPage} className={styles.buttons}>
+                    Previous 
+                </button>
+                <p>  Page {currentPage}</p>
+                <button onClick={handleNextPage} className={styles.buttons}>
+                    Next 
+                </button>
                 </div>
             </div>
-            <p>Low-Stock Products</p>
-            <table>
-                <th>sku</th>
-                <th>name</th>
-                <th>stock quantity</th>
-            {stock.map((info)=>
-                (
-                    <tr key={info.productId}> 
-                    <td>{info.sku}</td>
-                    <td>{info.name}</td>
-                    <td>{info.stockQuantity}</td>
-                    </tr>
-                )
-            )}
-            </table>
-        </div>
-        </>
+        </main>
     )
 }

@@ -12,7 +12,8 @@ export default function Registry() {
     const [userName, setUserName] = useState('');
     const [password, setPassword] = useState('');
     const [email, setEmail] = useState('');
-    const [selectedType, setSelectedType] = useState(types)
+    const [selectedType, setSelectedType] = useState(types);
+    const [errorResponse, setErrorResponse] = useState('');
     const handleSubmit = (event) => {
         event?.preventDefault();
         registerAttempt({ userName, password, email,  selectedType});
@@ -27,58 +28,65 @@ export default function Registry() {
                     "Authorization": `Bearer ${token}`,
                     
                 },
-                  body: JSON.stringify(data)//serializer
+                body: JSON.stringify(data)//serializer
             });
-            if (!response.ok) {
-                throw new Error('Reports request failed: ${response.status}');
+            if(response.status == 403){
+                throw new Error("You are not authorized to access register");
+            } else if (!response.ok) {
+                const body = await response.json().catch(() => null);//.catch(() => null) protects it from non json bodies/empty ones
+                const message = body && body.message ? body.message : `Registration failed (${response.status})`;//it gives the error message with, if it does not exist then return the other thing
+                throw new Error(message);
             }
             //setResult();
             //const data = await response.json();
         } catch (error) {
+            setErrorResponse(error.message);
             console.log(error);
         }
     }
 
     return (
-        <>
+        <main>
             <h1>Registration</h1>
             <div className={styles.layout}>
             <section className={styles.editor}>
             <form onSubmit={handleSubmit} className={styles.loginform}>
                 {/* <h1 className={styles.title}>Login</h1> */}
+                <label>Username</label>
                 <input
                     type="text"
                     id="userName"
                     name="userName"
-                    placeholder="Enter Username"
+                    // placeholder="Enter Username"
                     value={userName}
                     onChange={c => setUserName(c.target.value)}//refreshes the value inputted
                     maxLength="20"
                     required
                     className={styles.userinput} />
-
+<label>Password</label>
                 <input
                     type="password"
                     id="password"
                     name="password"
-                    placeholder="Enter Password"
+                    // placeholder="Enter Password"
                     value={password}
                     onChange={c => setPassword(c.target.value)}
                     maxLength="30"
                     className={styles.userinput}
                     required />
-
+<label>Email</label>
                 <input
                     type="text"
                     id="email"
                     name="email"
-                    placeholder="Enter Email"
+                    // placeholder="Enter Email"
                     value={email}
                     onChange={c => setEmail(c.target.value)}
                     maxLength="30"
                     className={styles.userinput}
                     required />
-<div className={styles.buttonlayout}>
+                    {errorResponse && <p role="alert">{errorResponse}</p>}
+                <div className={styles.buttonlayout}>
                 {types.map((type) => (
                     <button
                         key={type}
@@ -98,6 +106,6 @@ export default function Registry() {
             </form>
             </section>
             </div>
-        </>
+        </main>
     )
 }

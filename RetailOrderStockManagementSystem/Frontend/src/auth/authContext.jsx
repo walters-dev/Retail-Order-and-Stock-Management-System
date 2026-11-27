@@ -8,18 +8,21 @@ const TOKEN_KEY = "token";
 const ROLE_KEY = "role";
 
 export const AuthProvider = ({children}) => {
+    
     const [role, setRole] = useState(JSON.parse(localStorage.getItem(ROLE_KEY), "{}"));
     const [token, setToken] = useState(localStorage.getItem(TOKEN_KEY) || "");
     const navigation = useNavigate();
     const loginAttempt = async (data) => {
-        try {
+        // try {
             const response = await fetch('/api/Auth/Login', {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },//change cause of swagger??
                 body: JSON.stringify(data)//serializer
             });
             if (!response.ok) {
-                throw new Error('Login request failed: ${response.status}');
+                const body = await response.json().catch(() => null);//.catch(() => null) protects it from non json bodies/empty ones
+                const message = body && body.message ? body.message : `Login failed (${response.status})`;
+                throw new Error(message);
             }
             const result = await response.json();
             if (result) {
@@ -33,9 +36,9 @@ export const AuthProvider = ({children}) => {
             }
             console.log(result);
             //throw new Error(result.message);
-        } catch (error) {
-            console.log(error);
-        }
+        // } catch (error) {
+        //     console.log(error);
+        // }
         
 
     }

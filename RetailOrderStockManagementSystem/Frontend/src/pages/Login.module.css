@@ -21,7 +21,7 @@
 }
 .loginlayout{
     /* background-color: rgba(238, 3, 3, 1); */
-    /* display: flex; */
+    display: flex;
     margin: auto;
     /* padding: 100px; */
     /* height:100%; 
@@ -33,3 +33,10 @@
     margin: 2px;
 }
 
+.loginlayout [role="alert"]{
+  margin: 0;
+  padding: 12px;
+  border-radius: 6px;
+  background-color: #fef2f2;
+  color: #b91c1c;
+}
