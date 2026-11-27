@@ -31,6 +31,7 @@
 }
 
 .userinput {
+  margin: 12px 0 12px 12px;
   width: 300px;
   max-width: 100%;
   margin-right: 12px;
@@ -79,4 +80,22 @@
   /* flex-wrap: wrap; */
   gap: 8px;
   margin-bottom: 24px;
+}
+.showpassword {
+    /* position: absolute; */
+    display: flex;
+    right: 18px;
+    width: 35px;
+    height: 33px;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    margin-right: 12px;
+}
+
+.passwordWrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }

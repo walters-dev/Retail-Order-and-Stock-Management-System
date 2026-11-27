@@ -64,16 +64,31 @@ export default function Registry() {
                             required
                             className={styles.userinput} />
                         <label>Password</label>
-                        <input
-                            type="password"
-                            id="password"
-                            name="password"
-                            // placeholder="Enter Password"
-                            value={password}
-                            onChange={c => setPassword(c.target.value)}
-                            maxLength="30"
-                            className={styles.userinput}
-                            required />
+                        <div className={styles.passwordWrapper}>
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                // placeholder="Enter Password"
+                                value={password}
+                                onChange={c => setPassword(c.target.value)}
+                                maxLength="30"
+                                className={styles.userinput}
+                                required />
+                            <button className={styles.showpassword} type="button" onClick={() => {
+                                // document.getElementById("password").type = "text"
+                                let passInput = document.getElementById("password");
+                                let seePassImage = document.getElementById("image");
+                                if (passInput.type === "password") {
+                                    passInput.type = "text";
+                                    seePassImage.src = "/src/assets/hide.png";
+                                } else {
+                                    passInput.type = "password";
+                                    seePassImage.src = "/src/assets/show.png";
+                                }
+                            }}>
+                                <img id="image" src="/src/assets/show.png" className={styles.image} /></button>
+                        </div>
                         <label>Email</label>
                         <input
                             type="text"
