@@ -6,10 +6,12 @@
 
 /* Black sidebar, 220 pixels wide. */
 .app-sidebar {
-  flex: 0 0 220px;
+  flex: 0 0 250px;
   padding: 24px 16px;
   background-color: black;
   color: white;
+  
+ 
 }
 
 .sidebar-brand {
@@ -58,9 +60,11 @@
 @media (max-width: 700px) {
   .app-layout {
     flex-direction: column;
+    min-height: 100vh
   }
 
   .app-sidebar {
+    
     flex: 0 0 auto;
     padding: 16px;
   }
@@ -73,3 +77,40 @@
     padding: 20px;
   }
 }
+.sidebar-logo {
+  
+  width: 120px;
+  max-width: 100%;
+  height: auto;
+}
+.sidebar-logout {
+  display: block;
+  width: 100%;
+  margin-top: auto;
+  padding: 12px 16px;
+  border: 1px solid #b91c1c;
+  border-radius: 6px;
+  background-color: #b91c1c;
+  color: white;
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.sidebar-logout:hover {
+  background-color: #991b1b;
+  border-color: #991b1b;
+}
+
+.sidebar-logout:focus-visible {
+  outline: 2px solid white;
+  outline-offset: 3px;
+}
+.logout-button{
+   display: flex;
+    flex-direction: column;
+    margin-top: auto
+}
+

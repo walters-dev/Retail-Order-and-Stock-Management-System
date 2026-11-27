@@ -1,4 +1,6 @@
-﻿using k8s.Models;
+﻿//using k8s.Models;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
@@ -10,6 +12,7 @@ namespace RetailOrderStockManagementSystem.Backend.Controllers
 {
     [ApiController]
     [Route("api/customers")]
+    //[Authorize(Roles = "Admin, Staff")]
     public class CustomerController : ControllerBase
     {
         private readonly ICustomerService _customerService;
@@ -21,6 +24,7 @@ namespace RetailOrderStockManagementSystem.Backend.Controllers
 
         //GET /api/customers
         [HttpGet]
+        [Authorize(Roles = "Admin, Staff")]
         public async Task<IActionResult> GetAll(
             [FromQuery]CustomerQueryParameters parameters)
         {
@@ -30,6 +34,7 @@ namespace RetailOrderStockManagementSystem.Backend.Controllers
 
         //GET /api/customers/{id}
         [HttpGet("{id:guid}")]
+        [Authorize(Roles = "Admin, Staff")]
         public async Task<IActionResult> GetById(Guid id)
         {
             var customer = await _customerService.GetByIdAsync(id);
@@ -39,6 +44,7 @@ namespace RetailOrderStockManagementSystem.Backend.Controllers
 
         // POST /api/customers
         [HttpPost]
+        [Authorize(Roles = "Admin, Staff")]
         public async Task<IActionResult> Create([FromBody] CreateCustomerRequestDto dto)
         {
             try
@@ -59,6 +65,7 @@ namespace RetailOrderStockManagementSystem.Backend.Controllers
 
         // PUT /api/customers/{id}
         [HttpPut("{id:guid}")]
+        [Authorize(Roles = "Admin, Staff")]
         public async Task<IActionResult> Update(Guid id,[FromBody] UpdateCustomerRequestDto dto)
         {
             try
@@ -78,9 +85,10 @@ namespace RetailOrderStockManagementSystem.Backend.Controllers
 
         // PUT /api/customers/{id}/isActive?isActive=true
         [HttpPut("{id:guid}/isActive")]
+        [Authorize(Roles = "Admin, Staff")]
         public async Task<IActionResult> SetActive(
             Guid id,
-            [FromQuery] bool isActive = false)
+            [FromQuery, BindRequired] bool isActive )
         {
             bool updated = isActive
                 ? await _customerService.ReactivateAsync(id)

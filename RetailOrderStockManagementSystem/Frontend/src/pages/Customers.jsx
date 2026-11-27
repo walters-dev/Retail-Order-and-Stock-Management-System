@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import './Customers.css'
-
+import { useAuth } from '../auth/authContext.jsx'
+// const TOKEN_KEY = "token"
 const blankCustomer = {
   fullName: '',
   mobileNumber: '',
@@ -9,10 +10,15 @@ const blankCustomer = {
 }
 
 export default function Customers ()  {
+ const { token } = useAuth()
+ 
   const [customers, setCustomers] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
   const [searchText, setSearchText] = useState('')
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+  const [hasNextPage, setHasNextPage] = useState(false)
   const [selectedCustomer, setSelectedCustomer] = useState(null)
   const [formError, setFormError] = useState('')
   /* isSaving tracks a contact-details save. 
@@ -26,44 +32,71 @@ export default function Customers ()  {
   // Load customers when this component appears. Cancel the request during cleanup.
   useEffect(() => {
     const controller = new AbortController()
-
+    console.log(token);
     async function loadCustomers() {
-      try {
-        const response = await fetch(
-          '/api/customers',
-          { signal: controller.signal }
-        )
+  try {
+    setIsLoading(true)
+    setLoadError('')
 
-        if (!response.ok) {
-          throw new Error(`Customer request failed (${response.status})`)
-        }
-
-        const data = await response.json()
-
-        if (controller.signal.aborted) return
-
-        setCustomers(
-          data.map((customer) => ({
-            ...customer,
-            id: customer.customerId,
-          }))
-        )
-      } catch (error) {
-        if (controller.signal.aborted) return
-
-        console.error(error)
-        setLoadError('Customers could not be loaded. Refresh to try again.')
-      } finally {
-        if (!controller.signal.aborted) {
-          setIsLoading(false)
-        }
-      }
+    if (!token) {
+      throw new Error('Please log in to view customers.')
     }
+
+    const requestOptions = {
+      signal: controller.signal,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+
+    const response = await fetch(
+      `http://localhost:5162/api/customers?page=${page}&pageSize=${pageSize}`,
+      requestOptions
+    )
+
+    if (!response.ok) {
+      throw new Error(`Customer request failed (${response.status})`)
+    }
+
+    const data = await response.json()
+
+    const nextResponse = await fetch(
+      `http://localhost:5162/api/customers?page=${page + 1}&pageSize=${pageSize}`,
+      requestOptions
+    )
+
+    if (!nextResponse.ok) {
+      throw new Error(`Customer request failed (${nextResponse.status})`)
+    }
+
+    const nextCustomers = await nextResponse.json()
+
+    if (controller.signal.aborted) return
+
+    setHasNextPage(nextCustomers.length > 0)
+
+    setCustomers(
+      data.map((customer) => ({
+        ...customer,
+        id: customer.customerId,
+      }))
+    )
+  } catch (error) {
+    if (controller.signal.aborted) return
+
+    console.error(error)
+    setLoadError(error.message)
+  } finally {
+    if (!controller.signal.aborted) {
+      setIsLoading(false)
+    }
+  }
+}
 
     loadCustomers()
 
     return () => controller.abort()
-  }, [])
+  }, [page, pageSize, token])
 
   const searchTerm = searchText.trim().toLowerCase()
   const matchingCustomers = customers.filter((customer) =>
@@ -102,9 +135,7 @@ export default function Customers ()  {
       request.loyaltyCustomer = formData.has('loyaltyCustomer')
     }
 
-    const url = isEditing
-      ? `https://localhost:7041/api/customers/${customerId}`
-      : 'https://localhost:7041/api/customers'
+    const url = `/api/customers/${customerId}`
 
     setIsSaving(true)
     try {
@@ -112,9 +143,14 @@ export default function Customers ()  {
         method: isEditing ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': (`Bearer ${token}`) 
         },
         body: JSON.stringify(request),
       })
+
+      
+
+      
 
       if (!response.ok) {
         const problem = await response.json().catch(() => null)
@@ -171,8 +207,13 @@ export default function Customers ()  {
 
   try {
     const response = await fetch(
-      `https://localhost:7041/api/customers/${customerId}/isActive?isActive=${nextIsActive}`,
-      { method: 'PUT' }
+      `/api/customers/${customerId}/isActive?isActive=${nextIsActive}`,
+      { method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': (`Bearer ${token}`) 
+        },
+       }
     )
 
     if (!response.ok) {
@@ -241,6 +282,7 @@ export default function Customers ()  {
             + Add Customer
           </button>
 
+        
           <table>
             <thead>
               <tr>
@@ -286,6 +328,41 @@ export default function Customers ()  {
               ))}
             </tbody>
           </table>
+          <div className="pagination-controls">
+            <label>
+              Rows per page:{' '}
+              <select
+                value={pageSize}
+                onChange={(event) => {
+                  setPageSize(Number(event.target.value))
+                  setPage(1)
+                }}
+                disabled={isBusy || isLoading}
+              >
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+              </select>
+            </label>
+
+            <button
+              type="button"
+              onClick={() => setPage((current) => Math.max(1, current - 1))}
+              disabled={page === 1 || isBusy || isLoading}
+            >
+              Previous
+            </button>
+
+            <span aria-live="polite">Page {page}</span>
+
+            <button
+              type="button"
+              onClick={() => setPage((current) => current + 1)}
+              disabled={!hasNextPage || isBusy || isLoading}
+            >
+              Next
+            </button>
+          </div>
         </section>
 
         {selectedCustomer && (

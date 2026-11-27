@@ -181,3 +181,24 @@
   background-color: #fee2e2;
   color: #991b1b;
 }
+.pagination-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+.user-role-tag{
+  padding: 10px 16px;
+  border: 1px solid red;
+  border-radius: 6px;
+  background-color:white;
+  color: rgb(173, 20, 20);
+  font-weight: 600; 
+  margin: 12px;
+  
+  
+}
+.user-role-wrapper{
+  margin-bottom: 102px;
+}

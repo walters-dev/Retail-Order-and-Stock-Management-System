@@ -1,6 +1,8 @@
-import { Link, useParams } from 'react-router'
-import { sampleOrders } from './sampleOrders.js'
+import { useState, useEffect } from 'react'
+import { Link, useParams } from 'react-router-dom'
 import './Orders.css'
+import OrderActions from './OrderActions.jsx' 
+import { useAuth } from '../auth/authContext.jsx'
 
 const currencyFormatter = new Intl.NumberFormat('en-ZA', {
   style: 'currency',
@@ -9,20 +11,81 @@ const currencyFormatter = new Intl.NumberFormat('en-ZA', {
 
 export default function OrderDetails() {
   const { orderId } = useParams()
+  const {token, role} = useAuth()
+  // const token = localStorage.getItem('TOKEN_KEY');
+  const [order, setOrder] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
+  
 
-  const order = sampleOrders.find(
-    (item) => item.orderId === orderId
-  )
+   // Load this order from the backend when the page opens or the ID changes.
+   useEffect(() => {
+    const controller = new AbortController()
 
-  if (!order) {
+    async function loadOrder() {
+      try {
+       setIsLoading(true)
+      setLoadError('')
+
+      let url
+
+      if (role === 'Admin') {
+        url = `/api/orders/${orderId}`
+      } else if (role === 'Staff') {
+        url = `/api/orders/staff/${orderId}`
+      } else {
+        throw new Error('Your account cannot view this order.')
+      }
+        const response = await fetch(`/api/orders/${orderId}`, {
+          signal: controller.signal,
+          headers :{
+              "Content-Type": "application/json",
+              'Authorization': (`Bearer ${token}`) 
+            }
+        })
+
+        if (response.status === 404) throw new Error('Order not found.')
+        if (!response.ok) {
+          throw new Error(`Order request failed (${response.status})`)
+        }
+
+        const data = await response.json()
+        if (controller.signal.aborted) return
+
+        setOrder(data)
+      } catch (error) {
+        if (controller.signal.aborted) return
+
+        console.error(error)
+        setLoadError(error.message)
+      } finally {
+        if (!controller.signal.aborted) setIsLoading(false)
+      }
+    }
+
+    loadOrder()
+    return () => controller.abort()
+  }, [orderId, token ,role])
+
+  if (isLoading) {
+    return (
+      <main>
+        <h1>Order</h1>
+        <p role="status">Loading order…</p>
+      </main>
+    )
+  }
+
+  if (loadError || !order) {
     return (
       <main>
         <h1>Order not found</h1>
-        <p>That order is not in the sample data.</p>
+        <p role="alert">{loadError || 'That order could not be loaded.'}</p>
         <Link to="/orders">Back to orders</Link>
       </main>
     )
   }
+
 
   // Use an empty array if items are missing.
   const items = order.items ?? []
@@ -33,10 +96,10 @@ export default function OrderDetails() {
         Back to orders
       </Link>
 
-      <h1>Order {order.orderId.slice(0, 8)}</h1>
+      <h1>Receipt #{order.receiptId}</h1>
 
       <section className="orders-panel" aria-label="Order details">
-        <p className="orders-note">Sample data</p>
+    
 
         <div className="order-meta">
           <p>Order date: {order.orderDate}</p>
@@ -47,6 +110,8 @@ export default function OrderDetails() {
             {order.status}
           </span>
         </div>
+
+        <OrderActions order={order} onStatusChanged={setOrder} />
 
         <section className="order-customer">
           <h2>Customer</h2>
