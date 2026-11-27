@@ -214,6 +214,7 @@ public class OrderService : IOrderService
     private static OrderResponseAdminDto MapToDto(Order order) => new()
     {
         OrderId = order.OrderId,
+        ReceiptId = order.ReceiptId,
         CustomerId = order.CustomerId,
         OrderDate = order.OrderDate,
         Subtotal = order.Subtotal,
@@ -229,6 +230,7 @@ public class OrderService : IOrderService
     private static OrderResponseStaffDto MapToStaffDto(Order order) => new()
     {
         OrderId = order.OrderId,
+        ReceiptId = order.ReceiptId,
         CustomerId = order.CustomerId,
         OrderDate = order.OrderDate,
         Subtotal = order.Subtotal,
@@ -241,6 +243,7 @@ public class OrderService : IOrderService
     private static OrderDetailDto MapToDetailDto(Order order) => new()
     {
         OrderId = order.OrderId,
+        ReceiptId = order.ReceiptId,
         CustomerId = order.CustomerId,
         OrderDate = order.OrderDate,
         Subtotal = order.Subtotal,

@@ -206,3 +206,29 @@
   width: 100%;
   margin: 0;
 }
+.orders-panel .pagination-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.orders-panel .pagination-controls select,
+.orders-panel .pagination-controls button {
+  padding: 8px 12px;
+  border: 1px solid #dbe3ee;
+  border-radius: 6px;
+  font: inherit;
+}
+
+.orders-panel .pagination-controls button {
+  background-color: black;
+  color: white;
+  cursor: pointer;
+}
+
+.orders-panel .pagination-controls button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

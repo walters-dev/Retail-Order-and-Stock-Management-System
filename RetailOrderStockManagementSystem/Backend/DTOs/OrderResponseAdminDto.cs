@@ -8,6 +8,7 @@ namespace RetailOrderStockManagementSystem.Backend.DTOs
     public class OrderResponseAdminDto
     {
         public Guid OrderId { get; set; }
+        public int ReceiptId { get; set;  }
         public Guid CustomerId { get; set; }
         public DateOnly OrderDate { get; set; }
         public decimal Subtotal { get; set; }

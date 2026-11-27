@@ -19,7 +19,7 @@ const logout = () => {
 
   return (
     <button type="buton" className="sidebar-logout" onClick={() => logout()}>
-      Log out
+        Log out
     </button>
   );
 }

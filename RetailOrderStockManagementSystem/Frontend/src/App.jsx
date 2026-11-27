@@ -8,7 +8,8 @@ import Reports from './pages/Reports.jsx';
 import { AuthProvider, useAuth } from './auth/authContext.jsx';
 import logo from './assets/logo.png';
 import LogoutButton from './components/LogoutButton.jsx';
-
+import UserRoleTag from './components/UserRoleTag.jsx'
+const role = localStorage.getItem('role');
 // A small button that logs the user out.
 // It is its own component because only components INSIDE <AuthProvider>
 // can call useAuth().
@@ -20,12 +21,18 @@ export default function App() {
     <div className="app-layout">
       <aside className="app-sidebar">
         <img src={logo} alt="redAcademy" className="sidebar-logo" />
+
+
+
+
         <p className="sidebar-brand">
           Retail Order
           <br />
           &amp; Stock
         </p>
 
+        <UserRoleTag />
+        
         <nav aria-label="Main navigation">
           <NavLink to="/customers" className="sidebar-link">
             Customers
@@ -37,11 +44,11 @@ export default function App() {
           <NavLink to="/reports" className="sidebar-link">
             Reports
           </NavLink>
-          <NavLink>
-            <LogoutButton />
-          </NavLink>
-        </nav>
 
+        </nav>
+        <div className='logout-button'>
+          <LogoutButton />
+        </div>
 
       </aside>
 

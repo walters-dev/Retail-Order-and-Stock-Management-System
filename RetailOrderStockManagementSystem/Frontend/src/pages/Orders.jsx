@@ -1,11 +1,12 @@
-import { useState, useEffect} from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { useAuth } from '../auth/authContext.jsx'
 import './Orders.css'
-const TOKEN_KEY = "token"
+// const TOKEN_KEY = "token"
 
 
 
-  
+
 const statuses = [
   'All',
   'Pending',
@@ -21,49 +22,65 @@ const currencyFormatter = new Intl.NumberFormat('en-ZA', {
 })
 
 
-
 export default function Orders() {
-  
+  const { token, role } = useAuth()
+
   const [selectedStatus, setSelectedStatus] = useState('All')
-  const[orders, setOrders] = useState([])
-  const [token, setToken] = useState(localStorage.getItem(TOKEN_KEY) || "");
-  const[isLoading, setIsLoading] = useState(true)
-  const[loadError, setLoadError] = useState('')
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+  const [orders, setOrders] = useState([])
+  // const [token, setToken] = useState(localStorage.getItem(TOKEN_KEY) || "");
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
 
-useEffect(() =>{
-  const controller = new AbortController()
+  useEffect(() => {
+    const controller = new AbortController()
 
-  async function loadOrders(){
-    try {
-      const response = await fetch (
-        '/api/customers',{signal:controller.signal,
-          headers :{
-              "Content-Type": "application/json",
-              'Authorization': (`Bearer ${token}`) 
-            }
+    async function loadOrders() {
+      try {
+        setIsLoading(true)
+        setLoadError('')
+
+        let url
+
+        if (role === 'Admin') {
+          url = '/api/orders'
+        } else if (role === 'Staff') {
+          url = '/api/orders/staff'
+        } else {
+          throw new Error('Your account cannot view orders.')
         }
-        
-      )
 
-      if (!response.ok) {
+        const response = await fetch(
+          `${url}`, {
+          signal: controller.signal,
+          headers: {
+            "Content-Type": "application/json",
+            'Authorization': (`Bearer ${token}`)
+          }
+        }
+
+        )
+
+        if (!response.ok) {
           throw new Error(`Order request failed (${response.status})`)
         }
-      const data = await response.json()
-      if (controller.signal.aborted) return
+        const data = await response.json()
+        if (controller.signal.aborted) return
 
-      setOrders(data)
+        setOrders(data)
+      }
+      catch (error) {
+        if (controller.signal.aborted) return
+        console.log(error)
+        setLoadError('Orders Could Not Be Loaded. Refresh to try Again')
+      } finally {
+        if (!controller.signal.aborted) setIsLoading(false)
+      }
     }
-    catch (error) {
-      if (controller.signal.aborted) return
-      console.error(error)
-      setLoadError('Orders Could Not Be Loaded. Refresh to try Again')
-    } finally {
-      if (!controller.signal.aborted) setIsLoading(false)
-    }
-  }
-  loadOrders()
-  return() => controller.abort()
-}, [])
+    loadOrders()
+    return () => controller.abort()
+  }, [token, role])
 
 
   const matchingOrders = orders.filter(
@@ -72,8 +89,21 @@ useEffect(() =>{
       order.status === selectedStatus
   )
 
+  const totalPages = Math.max(
+    1,
+    Math.ceil(matchingOrders.length / pageSize)
+  )
+
+  const currentPage = Math.min(page, totalPages)
+  const startIndex = (currentPage - 1) * pageSize
+
+  const paginatedOrders = matchingOrders.slice(
+    startIndex,
+    startIndex + pageSize
+  )
+
   if (isLoading) {
-    return(
+    return (
       <main>
         <h1>Orders</h1>
         <p role="status">Loading orders...</p>
@@ -81,8 +111,8 @@ useEffect(() =>{
     )
   }
 
-  if(loadError){
-    return(
+  if (loadError) {
+    return (
       <main>
         <h1>Orders</h1>
         <p role="alert">{loadError}</p>
@@ -95,7 +125,7 @@ useEffect(() =>{
       <h1>Orders</h1>
 
       <section className="orders-panel" aria-label="Order list">
-        <p className="orders-note">Sample data</p>
+
 
         <div
           className="order-filters"
@@ -108,7 +138,10 @@ useEffect(() =>{
               type="button"
               className="order-filter"
               aria-pressed={selectedStatus === status}
-              onClick={() => setSelectedStatus(status)}
+              onClick={() => {
+                setSelectedStatus(status)
+                setPage(1)
+              }}
             >
               {status}
             </button>
@@ -119,7 +152,7 @@ useEffect(() =>{
           <table className="orders-table">
             <thead>
               <tr>
-                <th scope="col">Order ID</th>
+                <th scope="col">Receipt ID</th>
                 <th scope="col">Date</th>
                 <th scope="col" className="order-total">
                   Total
@@ -137,17 +170,17 @@ useEffect(() =>{
                 </tr>
               )}
 
-              {matchingOrders.map((order) => (
+              {paginatedOrders.map((order) => (
                 <tr key={order.orderId}>
-                 <td>
-                  <Link
-                    to={`/orders/${order.orderId}`}
-                    title={order.orderId}
-                    className="order-view-link"
-                >
-                    {order.orderId.slice(0, 8)}
-                  </Link>
-                </td>
+                  <td>
+                    <Link
+                      to={`/orders/${order.orderId}`}
+                      title={`View receipt #${order.receiptId}`}
+                      className="order-view-link"
+                    >
+                      #{order.receiptId}
+                    </Link>
+                  </td>
 
                   <td>{order.orderDate}</td>
 
@@ -166,6 +199,42 @@ useEffect(() =>{
               ))}
             </tbody>
           </table>
+        </div>
+        <div className="pagination-controls">
+          <label htmlFor="orders-page-size">Rows per page:</label>
+
+          <select
+            id="orders-page-size"
+            value={pageSize}
+            onChange={(event) => {
+              setPageSize(Number(event.target.value))
+              setPage(1)
+            }}
+          >
+            <option value={10}>10</option>
+            <option value={20}>20</option>
+            <option value={50}>50</option>
+          </select>
+
+          <button
+            type="button"
+            onClick={() => setPage(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </button>
+
+          <span aria-live="polite">
+            Page {currentPage} of {totalPages}
+          </span>
+
+          <button
+            type="button"
+            onClick={() => setPage(currentPage + 1)}
+            disabled={currentPage >= totalPages}
+          >
+            Next
+          </button>
         </div>
       </section>
     </main>

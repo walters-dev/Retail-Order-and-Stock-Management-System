@@ -1,5 +1,5 @@
 import { useState } from 'react'
-
+import { useAuth } from '../auth/authContext.jsx';
 const actionsByStatus = {
   Pending: [
     { action: 'confirm', label: 'Confirm order', roles: ['Admin'] },
@@ -12,9 +12,9 @@ const actionsByStatus = {
   Cancelled: [],
 }
 
-export default function OrderActions({ order, onStatusChanged, role = 'Admin' }) {
+export default function OrderActions({ order, onStatusChanged }) {
+  const { token, role } = useAuth()
   const [isBusy, setIsBusy] = useState(false)
-  const token = localStorage.getItem('TOKEN_KEY');
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
 
@@ -34,7 +34,10 @@ export default function OrderActions({ order, onStatusChanged, role = 'Admin' })
 
     try {
       const response = await fetch(`/api/orders/${order.orderId}/${action}`, {
-        method: 'PUT',
+           method: 'PUT',
+           headers: {
+           Authorization: `Bearer ${token}`,
+           }
       })
       const result = await response.json().catch(() => null)
 

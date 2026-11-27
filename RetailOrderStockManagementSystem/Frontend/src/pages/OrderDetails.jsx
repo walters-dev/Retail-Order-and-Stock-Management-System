@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import './Orders.css'
 import OrderActions from './OrderActions.jsx' 
+import { useAuth } from '../auth/authContext.jsx'
 
 const currencyFormatter = new Intl.NumberFormat('en-ZA', {
   style: 'currency',
@@ -10,10 +11,12 @@ const currencyFormatter = new Intl.NumberFormat('en-ZA', {
 
 export default function OrderDetails() {
   const { orderId } = useParams()
-  const token = localStorage.getItem('TOKEN_KEY');
-  const [orders, setOrders] = useState(null)
+  const {token, role} = useAuth()
+  // const token = localStorage.getItem('TOKEN_KEY');
+  const [order, setOrder] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
+  
 
    // Load this order from the backend when the page opens or the ID changes.
    useEffect(() => {
@@ -21,8 +24,24 @@ export default function OrderDetails() {
 
     async function loadOrder() {
       try {
+       setIsLoading(true)
+      setLoadError('')
+
+      let url
+
+      if (role === 'Admin') {
+        url = `/api/orders/${orderId}`
+      } else if (role === 'Staff') {
+        url = `/api/orders/staff/${orderId}`
+      } else {
+        throw new Error('Your account cannot view this order.')
+      }
         const response = await fetch(`/api/orders/${orderId}`, {
           signal: controller.signal,
+          headers :{
+              "Content-Type": "application/json",
+              'Authorization': (`Bearer ${token}`) 
+            }
         })
 
         if (response.status === 404) throw new Error('Order not found.')
@@ -46,7 +65,7 @@ export default function OrderDetails() {
 
     loadOrder()
     return () => controller.abort()
-  }, [orderId])
+  }, [orderId, token ,role])
 
   if (isLoading) {
     return (
@@ -77,10 +96,10 @@ export default function OrderDetails() {
         Back to orders
       </Link>
 
-      <h1>Order {order.orderId.slice(0, 8)}</h1>
+      <h1>Receipt #{order.receiptId}</h1>
 
       <section className="orders-panel" aria-label="Order details">
-        <p className="orders-note">Sample data</p>
+    
 
         <div className="order-meta">
           <p>Order date: {order.orderDate}</p>
