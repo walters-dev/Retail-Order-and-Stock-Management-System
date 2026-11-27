@@ -142,11 +142,15 @@ function AppWorkspace({ selectedProduct, setSelectedProduct }) {
     }
 
     const quoteData = await response.json();
+    const backendQuoteItems =
+      quoteData.items ?? quoteData.Items ?? quoteData.lines ?? [];
+
     setQuoteDraft({
       ...quoteData,
       customerId: quoteData.customerId ?? orderRequest.customerId,
       customerName: quoteData.customerName ?? orderRequest.customerName,
-      items: orderRequest.items,
+      items: backendQuoteItems,
+      requestItems: orderRequest.items,
     });
     navigate('/quote-summary');
   }
@@ -166,7 +170,7 @@ function AppWorkspace({ selectedProduct, setSelectedProduct }) {
         headers,
         body: JSON.stringify({
           customerId: quoteDraft.customerId,
-          items: quoteDraft.items,
+          items: quoteDraft.requestItems ?? quoteDraft.items,
         }),
       });
 
@@ -247,6 +251,7 @@ function AppWorkspace({ selectedProduct, setSelectedProduct }) {
           element={
             <QuoteSummary
               quote={quoteDraft}
+              products={products}
               onSubmitOrder={handleSubmitOrder}
               onBack={() => navigate('/create-order')}
               submitting={submittingOrder}
@@ -296,6 +301,10 @@ export default function App() {
 
           <NavLink to="/create-order" className="sidebar-link">
             Create Order
+          </NavLink>
+
+          <NavLink to="/quote-summary" className="sidebar-link">
+            Quote Summary
           </NavLink>
 
           <NavLink to="/orders" className="sidebar-link">

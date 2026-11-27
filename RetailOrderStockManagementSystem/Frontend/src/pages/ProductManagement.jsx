@@ -34,7 +34,6 @@ export default function ProductManagement({
   onSelectProduct,
   onSaved,
   onCancel,
-  onRefresh,
   loading = false,
 }) {
   const { token } = useAuth();
@@ -243,8 +242,8 @@ export default function ProductManagement({
             </p>
           </div>
 
-          <div className="product-management-header-actions">
-            {isEditing && (
+          {isEditing && (
+            <div className="product-management-header-actions">
               <button
                 type="button"
                 className="product-management-secondary-button"
@@ -253,18 +252,8 @@ export default function ProductManagement({
               >
                 + New Product
               </button>
-            )}
-            {onRefresh && (
-              <button
-                type="button"
-                className="product-management-primary-button"
-                onClick={onRefresh}
-                disabled={isSaving || loading}
-              >
-                {loading ? 'Refreshing...' : 'Refresh'}
-              </button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
         <div className="product-management-lookup">

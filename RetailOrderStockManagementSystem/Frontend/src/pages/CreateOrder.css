@@ -20,15 +20,15 @@
 }
 
 .order-title {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 700;
   color: #0f172a;
   margin: 0;
 }
 
 .order-subtitle {
-  font-size: 14px;
-  color: #64748b;
+  font-size: 16px;
+  color: black;
   margin: 4px 0 0;
 }
 
@@ -41,7 +41,7 @@
 }
 
 .order-form-group label {
-  font-size: 14px;
+  font-size: 20px;
   font-weight: 600;
   color: #0f172a;
 }
@@ -50,10 +50,10 @@
   width: 100%;
   max-width: 400px;
   padding: 10px 12px;
-  border: 1px solid #cbd5e1;
+  border: 2px solid black;
   border-radius: 6px;
   background-color: #ffffff;
-  font-size: 14px;
+  font-size: 15px;
   color: #0f172a;
 }
 
@@ -65,7 +65,7 @@
 /* Items Table & Rows */
 .order-table-wrapper {
   margin-top: 16px;
-  border: 1px solid #e2e8f0;
+  border: 3px solid black;
   border-radius: 8px;
   overflow-x: auto;
 }
@@ -170,8 +170,8 @@
 }
 
 .order-footnote {
-  font-size: 13px;
-  color: #64748b;
+  font-size: 15px;
+  color: black;
   margin: 0;
 }
 
@@ -191,22 +191,22 @@
 
 .order-btn-cancel {
   background-color: #ffffff;
-  border: 1px solid #cbd5e1;
+  border: 2px solid black;
   color: #0f172a;
 }
 
 .order-btn-cancel:hover {
-  background-color: #f1f5f9;
+  background-color: coral;
 }
 
 .order-btn-submit {
-  background-color: #000000;
-  border: 1px solid #000000;
-  color: #ffffff;
+  background-color: white;
+  border: 2px solid #000000;
+  color: black;
 }
 
 .order-btn-submit:hover:not(:disabled) {
-  background-color: #333333;
+  background-color: coral;
   border-color: #333333;
 }
 
